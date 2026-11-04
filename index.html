@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>しゅっしん｜しゅっしん は どちらですか。</title>
+<title>まち は どちらですか。</title>
 <style>
 *{box-sizing:border-box}
 :root{
@@ -4392,6 +4392,13 @@ padding:7px 10px;font:600 17px inherit;cursor:pointer;transition:.15s}
 <style>
 /* 投稿の更新では自動移動せず、手動スクロールで読む。 */
 .feed{overflow-y:auto!important;overflow-anchor:none;scroll-behavior:auto!important;}
+#thingArea .building-choice{display:flex;flex-wrap:wrap;align-content:center;align-items:center;justify-content:center;gap:4px;}
+#thingArea .building-choice .choice-word{display:inline-flex;flex-direction:column;align-items:center;background:var(--area);border-radius:5px;padding:4px 3px;}
+#thingArea .building-choice .choice-na{background:#fff1f5;color:#7a5964;}
+#thingArea .building-choice.selected .choice-word{background:#eef9fd;}
+#thingArea .building-choice.selected .choice-na{background:#fff1f5;}
+#thingArea .building-choice .choice-word .jp,#thingArea .building-choice .choice-word .cn{color:#234f63;}
+#thingArea .building-choice .choice-na .jp{color:#7a5964;}
 </style>
 <script>
 function preserveFeedPosition(feed){
@@ -4432,7 +4439,7 @@ function preserveFeedPosition(feed){
  <div class="composer">
   <div id="composerGuide" class="guide">发布一下自己的家乡吧。</div>
   <div class="qa-grid">
-    <div class="q-cell q1">しゅっしん は どちらですか。</div>
+    <div class="q-cell q1">名前さんのまち は どちらですか。</div>
     <div class="a-cell a1">
       <input id="shusshinInput" class="travel-destination-input shusshin-input" type="text"
              placeholder="用中文输入地名" autocomplete="off">
@@ -4619,10 +4626,17 @@ function renderThings(){
   const b=document.createElement("button");
   b.type="button";
   b.className="choice"+(selectedThing===jp?" selected":"");
-  const shownJp=(jp==="おおきい たてもの"||jp==="きれいな たてもの")
-    ? jp.replace(" たてもの","<br>たてもの")
-    : jp;
-  b.innerHTML=`<span class="jp">${shownJp}</span><span class="cn">${cn}</span>`;
+  const building=jp==="おおきい たてもの"||jp==="きれいな たてもの";
+  if(building){
+   b.classList.add("building-choice");
+   b.setAttribute("aria-label",jp);
+   const word=(text,translation)=>`<span class="choice-word"><span class="jp">${text}</span><span class="cn">${translation}</span></span>`;
+   b.innerHTML=jp==="おおきい たてもの"
+    ? word("おおきい","大")+word("たてもの","建筑")
+    : word("きれい","漂亮")+'<span class="choice-word choice-na"><span class="jp">な</span></span>'+word("たてもの","建筑");
+  }else{
+   b.innerHTML=`<span class="jp">${jp}</span><span class="cn">${cn}</span>`;
+  }
   b.onclick=()=>{
    selectedThing=jp;
    if(selectedThing==="おおきい たてもの"){
@@ -4654,6 +4668,7 @@ function townAdjHtml(adj, ending){
 }
 
 function updateComposer(){
+ document.querySelector(".q1").textContent=(userName||"名前")+"さんのまち は どちらですか。";
  const v=inputValue(), second=document.getElementById("shusshinSecond");
  const adjTable=document.getElementById("adjTable");
  if(adjTable) adjTable.style.display=v?"block":"none";
