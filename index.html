@@ -4601,6 +4601,16 @@ function renderNameAdj(){
   area.appendChild(b);
  });
 }
+function thingCardsHtml(thing){
+ const card=(jp,cn)=>`<span class="posted-card thing-card"><span>${esc(jp)}</span><span class="posted-cn">${esc(cn)}</span></span>`;
+ if(thing==="おおきい たてもの"){
+  return card("おおきい","大")+card("たてもの","建筑");
+ }
+ if(thing==="きれいな たてもの"){
+  return card("きれい","漂亮")+'<span class="na-card">な</span>'+card("たてもの","建筑");
+ }
+ return card(thing,(things.find(x=>x[0]===thing)||[])[1]||"");
+}
 function renderThings(){
  const area=document.getElementById("thingArea");
  if(!area)return;
@@ -4745,8 +4755,7 @@ const a2Cell=document.getElementById("shusshinSubjectAnswer").parentElement;
    }).join("");
  }
  if(selectedThing){
-  const ti=things.find(x=>x[0]===selectedThing);
-  thingBox.innerHTML=`<span class="posted-card thing-card"><span>${esc(selectedThing)}</span><span class="posted-cn">${esc(ti?ti[1]:"")}</span></span>`;
+  thingBox.innerHTML=thingCardsHtml(selectedThing);
   document.getElementById("arimasuText").textContent="が あります。";
  }else{
   thingBox.innerHTML="";
@@ -4917,7 +4926,7 @@ function renderPosts(){
 
   const thingLine=p.thing?`<span class="post-third-line">
     <span class="posted-place-plain">${esc(p.place)}</span><span>に</span>
-    <span class="posted-card"><span>${esc(p.thing)}</span><span class="posted-cn">${esc((things.find(x=>x[0]===p.thing)||[])[1]||"")}</span></span>
+    ${thingCardsHtml(p.thing)}
     <span>が あります。</span>
     ${p.thingName&&p.thingName!=="×"?`<span class="posted-place-plain">${esc(p.thingName)}</span><span>です。</span>`:""}
   </span>`:"";
