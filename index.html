@@ -4392,6 +4392,12 @@ padding:7px 10px;font:600 17px inherit;cursor:pointer;transition:.15s}
 <style>
 /* 投稿の更新では自動移動せず、手動スクロールで読む。 */
 .feed{overflow-y:auto!important;overflow-anchor:none;scroll-behavior:auto!important;}
+#dontKnowNameBtn{
+ position:static !important;
+ transform:none !important;
+ margin:0 0 0 4px !important;
+ flex:0 0 auto;
+}
 </style>
 <script>
 function preserveFeedPosition(feed){
@@ -4459,9 +4465,9 @@ function preserveFeedPosition(feed){
           <span class="name-input-wrap">
             <input id="thingNameInput" class="travel-destination-input thing-name-input" type="text"
                  placeholder="请输入名称" autocomplete="off">
-            <button id="dontKnowNameBtn" class="dont-know-name" type="button">不知道</button>
           </span>
           <span>です。</span>
+          <button id="dontKnowNameBtn" class="dont-know-name" type="button">名前知らない</button>
         </span>
       </div>
 
