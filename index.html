@@ -23,6 +23,9 @@
 .sentence{font-size:var(--sentence-font);align-items:baseline;row-gap:12px;padding-bottom:12px}
 .word,.na{margin-bottom:0}
 .post-image,.image-preview{height:calc(var(--sentence-font) * 1.7 * 3);width:auto;max-width:100%;object-fit:contain}
+ .photo-button{min-width:112px;padding:8px 12px;border:1px solid #9bcbe0;border-radius:8px;background:#eef9fd;color:#234f63}
+.photo-button:disabled{opacity:.45;cursor:default}
+.image-status{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .crop-preview{width:calc(var(--sentence-font) * 1.7 * 3);height:calc(var(--sentence-font) * 1.7 * 3);overflow:hidden;border-radius:8px;touch-action:none;cursor:grab;outline-offset:3px}
 .crop-preview.dragging{cursor:grabbing}
 .crop-preview .image-preview{width:100%;height:100%;max-height:none;max-width:none;object-fit:cover;border-radius:0;pointer-events:none;user-select:none}
@@ -40,7 +43,7 @@
  <div class="feed-resizer"><button id="feedToggleBtn" type="button" title="投稿欄を広げる" aria-label="投稿欄を広げる" aria-controls="feed" aria-expanded="false">▼</button></div>
  <section class="composer" aria-label="投稿を作る">
   <p class="guide">上传图片，介绍一下吧。</p>
-  <div class="photo-row"><label class="upload-label">从相册选择<input id="imageInput" class="file-input" type="file" accept=".jpg,.jpeg,.png,.webp,.gif,.heic,.heif"></label><span id="imageStatus" class="note" role="status">请选择图片</span><button id="removePhoto" class="remove-photo" type="button" hidden>移除图片</button></div>
+  <div class="photo-row"><button id="addPhoto" class="photo-button" type="button">添加图片</button><button id="removePhoto" class="photo-button" type="button" disabled>删除图片</button><input id="imageInput" type="file" accept=".jpg,.jpeg,.png,.webp,.gif,.heic,.heif" hidden><span id="imageStatus" class="image-status" role="status">请选择图片</span></div>
   <div id="cropPreview" class="crop-preview" tabindex="0" role="group" aria-label="画像をドラッグ、または矢印キーで切り取り位置を調整" aria-describedby="cropHint" hidden><img id="imagePreview" class="image-preview" alt="投稿する画像（正方形）" draggable="false" hidden></div>
   <p id="cropHint" class="crop-hint" hidden>拖动图片调整位置</p>
   <div class="sentence"><span>これは</span><input id="objectName" class="name-input" placeholder="请输入名称" aria-label="紹介するものの名前" maxlength="60"><span>です。</span><button id="postBtn" class="primary" type="button" disabled>发布</button></div>
@@ -240,7 +243,7 @@ function commitCrop(){
 function clearImage(){
  imageVersion++;imageBusy=false;imageData='';cropState=null;cropDrag=null;
  $('cropPreview').classList.remove('dragging');$('cropPreview').hidden=true;$('cropHint').hidden=true;
- $('imageInput').value='';$('imagePreview').hidden=true;$('imagePreview').removeAttribute('src');$('removePhoto').hidden=true;$('imageStatus').textContent='请选择图片';update();
+ $('imageInput').value='';$('imagePreview').hidden=true;$('imagePreview').removeAttribute('src');$('removePhoto').disabled=true;$('imageStatus').textContent='请选择图片';update();
 }
 $('cropPreview').addEventListener('pointerdown',event=>{
  if(!cropState||imageBusy||cropDrag||event.button!==0)return;
@@ -276,11 +279,12 @@ $('imageInput').onchange=async()=>{
   const data=await compressImage(file),image=new Image();image.src=data;await image.decode();if(version!==imageVersion)return;
   const side=Math.min(image.naturalWidth,image.naturalHeight);cropState={image,side,x:(image.naturalWidth-side)/2,y:(image.naturalHeight-side)/2};
   $('imagePreview').src=data;$('imagePreview').hidden=false;$('cropPreview').hidden=false;$('cropHint').hidden=false;
-  showCrop();commitCrop();clearTimeout(toastTimer);$('toast').hidden=true;$('removePhoto').hidden=false;$('imageStatus').textContent='图片已选择';
+  showCrop();commitCrop();clearTimeout(toastTimer);$('toast').hidden=true;$('removePhoto').disabled=false;$('imageStatus').textContent='图片已选择';
  }
  catch(error){if(version!==imageVersion)return;notify(error.message||'无法读取图片，请重试。');$('imageStatus').textContent=imageData?'图片已选择':'请选择图片'}
  finally{if(version===imageVersion){imageBusy=false;update()}}
 };
+$('addPhoto').onclick=()=>$('imageInput').click();
 $('removePhoto').onclick=clearImage;
 $('objectName').oninput=update;
 $('nameInput').value=userName;
