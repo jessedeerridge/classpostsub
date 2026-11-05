@@ -1672,6 +1672,10 @@ padding:7px 10px;font:600 17px inherit;cursor:pointer;transition:.15s}
  font-weight:700;
  margin:0 0 7px 2px;
 }
+.adjective-table .choice.na-adjective:not(.selected){
+ background:#fff1f5;
+ border-color:#dfbdcc;
+}
 .adjective-table{
  background:#e8f6fc;
  border-color:#9bcbe0;
@@ -4508,10 +4512,10 @@ try{posts=JSON.parse(localStorage.getItem(POSTS_KEY))||[]}catch{posts=[]}
 
 const adjectives=[
  ["おおきい","大",false],["ちいさい","小",false],
- ["しずか","安静",true],["にぎやか","热闹",true],
- ["きれい","漂亮",true],
  ["みどりが おおい","绿化多",false],["ひとが おおい","人多",false],
- ["いい","好",false]
+ ["いい","好",false],
+ ["しずか","安静",true],["にぎやか","热闹",true],
+ ["きれい","漂亮",true]
 ];
 let selectedAdjs=[];
 const things=[
@@ -4536,10 +4540,10 @@ function alignSecondAnswer(){}
 
 function renderAdj(){
  const area=document.getElementById("adjArea"); area.innerHTML="";
- adjectives.forEach(([jp,cn])=>{
+ adjectives.forEach(([jp,cn,needsNa])=>{
   const b=document.createElement("button");
   b.type="button";
-  b.className="choice"+(selectedAdjs.includes(jp)?" selected":"");
+  b.className="choice"+(needsNa?" na-adjective":"")+(selectedAdjs.includes(jp)?" selected":"");
   b.innerHTML=`<span class="jp">${jp}</span><span class="cn">${cn}</span>`;
   b.onclick=()=>{
    const i=selectedAdjs.indexOf(jp);
@@ -4574,12 +4578,12 @@ function renderNameAdj(){
  const area=document.getElementById("nameAdjArea");
  if(!area)return;
  area.innerHTML="";
- nameAdjectives.forEach(([jp,cn])=>{
+ nameAdjectives.forEach(([jp,cn,needsNa])=>{
   const b=document.createElement("button");
   b.type="button";
   const sizeLocked=(selectedThing==="おおきい たてもの" && (jp==="おおきい" || jp==="ちいさい"));
   b.disabled=sizeLocked;
-  b.className="choice"+(selectedNameAdjs.includes(jp)?" selected":"")+(sizeLocked?" disabled-choice":"");
+  b.className="choice"+(needsNa?" na-adjective":"")+(selectedNameAdjs.includes(jp)?" selected":"")+(sizeLocked?" disabled-choice":"");
   b.innerHTML=`<span class="jp">${jp}</span><span class="cn">${cn}</span>`;
   b.onclick=()=>{
    const i=selectedNameAdjs.indexOf(jp);
