@@ -4392,13 +4392,6 @@ padding:7px 10px;font:600 17px inherit;cursor:pointer;transition:.15s}
 <style>
 /* 投稿の更新では自動移動せず、手動スクロールで読む。 */
 .feed{overflow-y:auto!important;overflow-anchor:none;scroll-behavior:auto!important;}
-#thingArea .building-choice{display:flex;flex-wrap:wrap;align-content:center;align-items:center;justify-content:center;gap:4px;}
-#thingArea .building-choice .choice-word{display:inline-flex;flex-direction:column;align-items:center;background:var(--area);border-radius:5px;padding:4px 3px;}
-#thingArea .building-choice .choice-na{background:#fff1f5;color:#7a5964;}
-#thingArea .building-choice.selected .choice-word{background:#eef9fd;}
-#thingArea .building-choice.selected .choice-na{background:#fff1f5;}
-#thingArea .building-choice .choice-word .jp,#thingArea .building-choice .choice-word .cn{color:#234f63;}
-#thingArea .building-choice .choice-na .jp{color:#7a5964;}
 </style>
 <script>
 function preserveFeedPosition(feed){
@@ -4626,17 +4619,10 @@ function renderThings(){
   const b=document.createElement("button");
   b.type="button";
   b.className="choice"+(selectedThing===jp?" selected":"");
-  const building=jp==="おおきい たてもの"||jp==="きれいな たてもの";
-  if(building){
-   b.classList.add("building-choice");
-   b.setAttribute("aria-label",jp);
-   const word=(text,translation)=>`<span class="choice-word"><span class="jp">${text}</span><span class="cn">${translation}</span></span>`;
-   b.innerHTML=jp==="おおきい たてもの"
-    ? word("おおきい","大")+word("たてもの","建筑")
-    : word("きれい","漂亮")+'<span class="choice-word choice-na"><span class="jp">な</span></span>'+word("たてもの","建筑");
-  }else{
-   b.innerHTML=`<span class="jp">${jp}</span><span class="cn">${cn}</span>`;
-  }
+  const shownJp=(jp==="おおきい たてもの"||jp==="きれいな たてもの")
+    ? jp.replace(" たてもの","<br>たてもの")
+    : jp;
+  b.innerHTML=`<span class="jp">${shownJp}</span><span class="cn">${cn}</span>`;
   b.onclick=()=>{
    selectedThing=jp;
    if(selectedThing==="おおきい たてもの"){
