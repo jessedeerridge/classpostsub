@@ -4555,7 +4555,7 @@ function renderAdj(){
   const b=document.createElement("button");
   b.type="button";
   b.className="choice"+(needsNa?" na-adjective":"")+(selectedAdjs.includes(jp)?" selected":"");
-  b.innerHTML=`<span class="jp">${jp}</span><span class="cn">${cn}</span>`;
+  b.innerHTML=`<span class="jp">${esc(jp).replace("が おおい","が<br>おおい")}</span><span class="cn">${esc(cn)}</span>`;
   b.onclick=()=>{
    const i=selectedAdjs.indexOf(jp);
    if(i>=0){
@@ -4595,7 +4595,7 @@ function renderNameAdj(){
   const sizeLocked=(selectedThing==="おおきい たてもの" && (jp==="おおきい" || jp==="ちいさい"));
   b.disabled=sizeLocked;
   b.className="choice"+(needsNa?" na-adjective":"")+(selectedNameAdjs.includes(jp)?" selected":"")+(sizeLocked?" disabled-choice":"");
-  b.innerHTML=`<span class="jp">${jp}</span><span class="cn">${cn}</span>`;
+  b.innerHTML=`<span class="jp">${esc(jp).replace("が おおい","が<br>おおい")}</span><span class="cn">${esc(cn)}</span>`;
   b.onclick=()=>{
    const i=selectedNameAdjs.indexOf(jp);
 

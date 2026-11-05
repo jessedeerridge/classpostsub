@@ -99,7 +99,7 @@ function renderChoices(){
  $('adjArea').innerHTML='';
  adjectives.forEach(([jp,cn,na])=>{
   const button=document.createElement('button');button.type='button';button.className='choice'+(na?' na-adjective':'')+(selectedAdjs.includes(jp)?' selected':'');
-  button.setAttribute('aria-pressed',String(selectedAdjs.includes(jp)));button.innerHTML=`<span class="jp">${esc(jp)}</span><span class="cn">${esc(cn)}</span>`;
+  button.setAttribute('aria-pressed',String(selectedAdjs.includes(jp)));button.innerHTML=`<span class="jp">${esc(jp).replace("が おおい","が<br>おおい")}</span><span class="cn">${esc(cn)}</span>`;
   button.onclick=()=>{
    selectedAdjs=selectedAdjs.includes(jp)?[]:[jp];
    renderChoices();update();
