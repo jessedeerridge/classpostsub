@@ -1,0 +1,5529 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>まち は どちらですか。</title>
+<style>
+*{box-sizing:border-box}
+:root{
+  --bg:#dff2fb;--panel:#fff;--ink:#292929;--line:#9bcbe0;
+  --area:#cfeaf6;--btn:#eef9fd;--sel:#6db9dc;--dark:#286b8a;
+}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);
+font-family:"Yu Kyokasho","YuKyokasho","BIZ UDPGothic","Noto Sans JP",sans-serif}
+.app{width:min(1050px,96vw);margin:auto;padding:10px 0 24px}
+.board-title{font-size:13px;color:#777;margin:0 0 3px 3px}
+.feed{height:275px;overflow-y:auto;background:rgba(255,255,255,.75);border:1px solid var(--line);
+border-radius:14px;padding:5px;display:flex;flex-direction:column;gap:4px}
+.empty{height:100%;display:grid;place-items:center;color:#aaa;font-size:14px}
+.post{background:#fff;border:1px solid #dbe6d6;border-left:4px solid var(--sel);
+border-radius:9px;padding:6px;font-size:16px;flex:0 0 auto}
+.composer{margin-top:10px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px}
+.guide{font-family:"Noto Sans SC","Microsoft YaHei",sans-serif;color:#666;font-size:14px;margin-bottom:3px}
+.question{text-align:center;font-size:20px;font-weight:600;margin:3px 0 6px}
+.preview{display:flex;justify-content:center;align-items:center;gap:5px;min-height:40px;
+font-size:19px;font-weight:600;white-space:nowrap;margin-bottom:5px}
+.preview-place{
+ position:relative;background:var(--area);color:#234f63;border-radius:8px;padding:5px 8px}
+.post-btn{border:0;border-radius:9px;background:var(--dark);color:#fff;padding:8px 16px;font-weight:700;cursor:pointer}
+.post-btn:disabled{opacity:.28;cursor:default}
+.place-box{background:var(--area);border-radius:11px;padding:6px}
+.choices{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+.choice{min-height:39px;border:1px solid #76a862;border-radius:7px;background:var(--btn);color:#234f63;
+padding:3px 2px;cursor:pointer;font:inherit}
+.choice.selected{background:var(--sel);border-color:#286b8a}
+.jp{display:block;font-size:14px;font-weight:600;line-height:1}
+.cn{display:block;font-family:"Noto Sans SC","Microsoft YaHei",sans-serif;font-size:10px;line-height:1;
+margin-top:3px;opacity:.75}
+.patterns{display:flex;justify-content:center;gap:8px;margin-top:5px}
+.pattern{min-width:120px;border:1px solid #76a862;border-radius:8px;background:var(--btn);color:#234f63;
+padding:7px 10px;font:600 17px inherit;cursor:pointer;transition:.15s}
+.pattern.selected{background:var(--sel);border-color:#286b8a}
+.pattern.disabled{opacity:.18;cursor:default;filter:grayscale(.5)}
+.name-modal{position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:99;display:flex;align-items:center;justify-content:center}
+.name-box{background:#fff;border-radius:16px;padding:22px;width:min(340px,90vw);text-align:center}
+.name-input{width:100%;border:1.5px solid #ccc;border-radius:10px;padding:11px;font-size:16px;text-align:center}
+.name-save{margin-top:12px;border:0;border-radius:9px;background:var(--dark);color:#fff;padding:9px 22px;font-weight:700}
+.hidden{display:none!important}
+@media(max-width:700px){
+ .app{padding-top:5px}.feed{height:275px}.composer{margin-top:6px;padding:6px}
+ .guide{font-size:13px;margin-bottom:1px}.question{font-size:15px;margin:2px 0 3px}
+ .preview{font-size:15px;min-height:32px;gap:3px;margin-bottom:3px}.preview-place{padding:4px 5px}
+ .choices{grid-template-columns:repeat(4,minmax(0,1fr));gap:3px}
+ .choice{min-height:34px;padding:2px 1px}.jp{font-size:13px}.cn{font-size:10px;margin-top:2px}
+ .patterns{margin-top:4px;gap:5px}.pattern{min-width:105px;padding:5px 7px;font-size:15px}
+ .post-btn{padding:6px 10px;font-size:12px}input{font-size:16px!important}
+}
+
+.preview-place,.post-place{position:relative;margin-bottom:10px}
+.preview-cn,.post-cn{
+  position:absolute;left:0;right:0;top:calc(100% + 2px);
+  text-align:center;font-family:"Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:11px;font-weight:500;line-height:1;color:#555;white-space:nowrap
+}
+.post-line{display:flex;align-items:center;gap:3px;white-space:nowrap;min-height:34px}
+.post-place{display:inline-flex;align-items:center;justify-content:center;background:var(--area);
+  color:#234f63;border-radius:7px;padding:4px 6px}
+@media(max-width:700px){
+ .preview-cn,.post-cn{font-size:10px;top:calc(100% + 1px)}
+ .preview-place,.post-place{margin-bottom:9px}
+}
+
+
+.second-stage{display:none;margin-top:4px}
+.second-stage.show{display:block}
+.second-place-box{background:var(--area);border-radius:11px;padding:6px}
+.second-choice{min-height:39px;border:1px solid #76a862;border-radius:7px;background:var(--btn);
+ color:#234f63;padding:3px 2px;font:inherit}
+.second-choice.locked{opacity:.18}
+.second-choice.active{background:var(--sel);border-color:#286b8a}
+.second-patterns{display:flex;justify-content:center;margin-top:4px}
+.second-de{min-width:120px;border:1px solid #76a862;border-radius:8px;background:var(--btn);
+ color:#234f63;padding:7px 10px;font:600 17px inherit;cursor:pointer}
+.second-de.selected{background:var(--sel);border-color:#286b8a}
+
+/* 投稿の訳は日本語の下に固定。文の位置を上げない */
+.post{padding-bottom:13px}
+.post-line{min-height:38px;align-items:flex-start;padding-top:4px}
+.post-place{margin-bottom:0!important}
+.post-cn{top:calc(100% + 2px)!important;transform:none!important;line-height:1!important}
+
+@media(max-width:700px){
+ .second-stage{margin-top:3px}
+ .second-place-box{padding:3px}
+ .second-choice{min-height:34px;padding:2px 1px}
+ .second-patterns{margin-top:3px}
+ .second-de{min-width:105px;padding:5px 7px;font-size:15px}
+ .post{padding-bottom:12px}
+ .post-line{min-height:36px;padding-top:3px}
+}
+
+
+/* ===== 2段目簡略化＋訳の重なり修正 ===== */
+.preview{
+  padding-bottom:13px !important;
+  margin-bottom:4px !important;
+  overflow:visible !important;
+}
+.preview-place{
+  margin-bottom:0 !important;
+  overflow:visible !important;
+}
+.preview-cn{
+  z-index:3 !important;
+  top:calc(100% + 2px) !important;
+}
+.place-box{
+  position:relative;
+  z-index:1;
+}
+.place-box.has-de-hint{
+  padding-bottom:31px !important;
+}
+
+.second-stage{display:none;margin-top:4px}
+.second-stage.show{display:block}
+.second-line{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  min-height:42px;
+}
+.second-place{
+  position:relative;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  background:var(--area);
+  color:#234f63;
+  border-radius:8px;
+  padding:5px 8px;
+  font-size:17px;
+  font-weight:600;
+  margin-bottom:10px;
+}
+.second-cn{
+  position:absolute;
+  left:0;right:0;
+  top:calc(100% + 2px);
+  text-align:center;
+  font-family:"Noto Sans SC","Microsoft YaHei",sans-serif;
+  font-size:11px;
+  font-weight:500;
+  line-height:1;
+  color:#555;
+  white-space:nowrap;
+}
+.second-de{
+  min-width:70px !important;
+  border:1px solid #76a862;
+  border-radius:8px;
+  background:var(--btn);
+  color:#234f63;
+  padding:7px 10px;
+  font:600 17px inherit;
+  cursor:pointer;
+}
+.second-de.selected{background:var(--sel);border-color:#286b8a}
+
+@media(max-width:700px){
+  .preview{
+    min-height:44px !important;
+    padding-bottom:11px !important;
+    margin-bottom:3px !important;
+  }
+  .second-stage{margin-top:3px}
+  .second-line{min-height:36px;gap:5px}
+  .second-place{font-size:14px;padding:4px 6px;margin-bottom:9px}
+  .second-cn{font-size:10px;top:calc(100% + 1px)}
+  .second-de{min-width:58px !important;padding:5px 8px;font-size:15px}
+}
+
+
+/* ===== 下段を上段と同じ文スタイルに統一 ===== */
+.second-stage{display:none;margin-top:3px}
+.second-stage.show{display:block}
+.second-preview{
+  margin:0 !important;
+  padding-bottom:13px !important;
+  min-height:42px !important;
+}
+.second-preview .preview-place{
+  margin-bottom:0 !important;
+}
+@media(max-width:700px){
+  .second-stage{margin-top:2px}
+  .second-preview{
+    min-height:44px !important;
+    padding-bottom:11px !important;
+    margin-bottom:0 !important;
+  }
+}
+
+
+/* ===== 投稿欄：文と訳の高さを揃える ===== */
+.post{
+  padding-top:5px !important;
+  padding-bottom:5px !important;
+  overflow:visible !important;
+}
+.post-line{
+  display:flex !important;
+  align-items:center !important;
+  gap:3px !important;
+  min-height:42px !important;
+  padding-top:0 !important;
+  padding-bottom:13px !important;
+  line-height:1 !important;
+}
+.post-place{
+  position:relative !important;
+  display:inline-flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  padding:5px 8px !important;
+  margin:0 !important;
+  line-height:1 !important;
+}
+.post-cn{
+  top:calc(100% + 2px) !important;
+  bottom:auto !important;
+  transform:none !important;
+}
+@media(max-width:700px){
+  .post{padding-top:3px !important;padding-bottom:3px !important}
+  .post-line{
+    min-height:44px !important;
+    padding-top:0 !important;
+    padding-bottom:11px !important;
+  }
+  .post-place{padding:4px 5px !important}
+  .post-cn{top:calc(100% + 1px) !important}
+}
+
+
+/* ===== 2段目 名詞群 ===== */
+.noun-area{margin-top:5px;display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.noun-group{background:#fffbd1;border-radius:14px;padding:7px}
+.noun-group:last-child{grid-column:1 / -1}
+.noun-title{text-align:center;font-size:12px;font-weight:700;margin-bottom:5px;color:#555}
+.noun-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}
+.noun-choice{min-height:38px}
+.noun-group:last-child .noun-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:700px){
+ .noun-area{gap:5px;margin-top:3px}
+ .noun-group{padding:5px;border-radius:11px}
+ .noun-title{font-size:10px;margin-bottom:3px}
+ .noun-grid{gap:3px}
+ .noun-choice{min-height:34px;font-size:12px}
+ .noun-group:last-child .noun-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+
+
+/* ===== 名詞群は分類せず1つに統一 ===== */
+.noun-area{
+ display:grid !important;
+ grid-template-columns:repeat(4,minmax(0,1fr)) !important;
+ gap:4px !important;
+ background:#fffbd1 !important;
+ border-radius:14px !important;
+ padding:7px !important;
+}
+@media(max-width:700px){
+ .noun-area{
+   grid-template-columns:repeat(3,minmax(0,1fr)) !important;
+   gap:3px !important;
+   padding:5px !important;
+   border-radius:11px !important;
+ }
+}
+
+
+/* ===== 名詞選択 → 「～を」に反映 ===== */
+.noun-preview{
+ margin-top:4px !important;
+ margin-bottom:0 !important;
+ padding-bottom:13px !important;
+ min-height:42px !important;
+}
+@media(max-width:700px){
+ .noun-preview{
+   margin-top:3px !important;
+   min-height:44px !important;
+   padding-bottom:11px !important;
+ }
+}
+
+
+/* ===== 「を」ガイド＋選択後のみ文に表示 ===== */
+.noun-area{
+ position:relative !important;
+ padding-bottom:25px !important;
+}
+.noun-area-hint{
+ position:absolute;
+ left:50%;
+ bottom:5px;
+ transform:translateX(-50%);
+ font-size:20px;
+ font-weight:700;
+ color:#234f63;
+ line-height:1;
+ pointer-events:none;
+}
+@media(max-width:700px){
+ .noun-area{padding-bottom:22px !important}
+ .noun-area-hint{bottom:4px;font-size:19px}
+}
+
+.inside-patterns{margin-top:6px!important;padding-top:5px!important;border-top:1px solid var(--line)}
+@media(max-width:700px){.inside-patterns{margin-top:4px!important;padding-top:4px!important}}
+
+
+
+
+.first-stage-de-hint{
+ position:absolute;
+ left:50%;
+ transform:translateX(-50%);
+ bottom:5px;
+ z-index:3;
+ text-align:center;
+ font-size:20px;
+ font-weight:700;
+ color:#234f63;
+ line-height:1;
+ pointer-events:none;
+}
+/* ===== 選択前後で文の形・高さを変えない ===== */
+.wo-slot{
+ display:inline-block;
+ min-width:1em;
+ text-align:left;
+}
+.preview-place{
+ min-width:2.2em;
+}
+.second-preview,
+#preview{
+ align-items:center !important;
+}
+
+
+/* ===== で／へ いきます。は場所ボタンと同じ文字 ===== */
+.inside-patterns .pattern{
+ font-family:inherit !important;
+ font-size:inherit !important;
+ font-weight:inherit !important;
+ line-height:inherit !important;
+}
+.inside-patterns .pattern:disabled{
+ opacity:1;
+ cursor:default;
+}
+.inside-patterns .pattern:not(.selected){
+ opacity:.25;
+}
+
+
+/* ===== 投稿：作った文を全部表示、2文目は改行 ===== */
+.post-author{
+ font-size:12px;
+ margin-bottom:3px;
+ color:#555;
+}
+.posted-sentence{
+ display:block;
+ line-height:1.65;
+ white-space:normal;
+}
+.posted-sentence + .posted-sentence{
+ margin-top:2px;
+}
+
+
+/* ===== 投稿文：カード＋訳、名前は同じ行 ===== */
+.post{
+ overflow:visible !important;
+ padding:7px 8px !important;
+}
+.posted-row{
+ display:flex;
+ align-items:center;
+ gap:3px;
+ min-height:39px;
+ line-height:1;
+ white-space:nowrap;
+ padding-bottom:11px;
+}
+.posted-row-second{
+ margin-top:1px;
+}
+.posted-name{
+ flex:0 0 auto;
+ font-size:13px;
+ color:#555;
+}
+.posted-card{
+ position:relative;
+ display:inline-flex;
+ align-items:center;
+ justify-content:center;
+ background:var(--area);
+ color:#234f63;
+ border-radius:7px;
+ padding:5px 7px;
+ line-height:1;
+ flex:0 0 auto;
+}
+.posted-cn{
+ position:absolute;
+ left:0;right:0;
+ top:calc(100% + 2px);
+ text-align:center;
+ font-family:"Noto Sans SC","Microsoft YaHei",sans-serif;
+ font-size:10px;
+ font-weight:500;
+ line-height:1;
+ color:#555;
+ white-space:nowrap;
+}
+@media(max-width:700px){
+ .post{padding:5px 6px !important}
+ .posted-row{min-height:37px;padding-bottom:10px;gap:2px}
+ .posted-name{font-size:12px}
+ .posted-card{padding:4px 5px}
+ .posted-cn{font-size:9px;top:calc(100% + 1px)}
+}
+
+
+/* 2文目の本文開始位置を1文目と完全に揃える */
+.posted-name-spacer{
+ visibility:hidden;
+}
+
+
+/* ===== 動詞群 ===== */
+.verb-area{
+ display:grid;
+ grid-template-columns:repeat(4,minmax(0,1fr));
+ gap:4px;
+ background:#bfe8f7;
+ border-radius:14px;
+ padding:7px;
+ margin-top:6px;
+}
+.verb-choice{min-height:38px}
+@media(max-width:700px){
+ .verb-area{
+   grid-template-columns:repeat(3,minmax(0,1fr));
+   gap:3px;
+   padding:5px;
+   margin-top:4px;
+   border-radius:11px;
+ }
+ .verb-choice{min-height:34px;font-size:12px}
+}
+
+
+/* ===== 3段目：選択動詞もカードで文に反映 ===== */
+.verb-preview{
+ margin-top:4px !important;
+ margin-bottom:0 !important;
+ padding-bottom:13px !important;
+ min-height:42px !important;
+}
+@media(max-width:700px){
+ .verb-preview{
+   margin-top:3px !important;
+   min-height:44px !important;
+   padding-bottom:11px !important;
+ }
+}
+
+
+/* 2段目・3段目は最初から常時表示 */
+#secondStage{display:block !important}
+
+
+/* 1段目未選択時は2文目だけ隠す */
+#secondPlaceLine.waiting-place{
+ visibility:hidden !important;
+}
+
+
+.me-too-wrap{display:flex;justify-content:flex-end;align-items:center;margin-top:4px}
+.me-too-btn{border:1px solid var(--line);background:var(--button);color:#234f63;border-radius:999px;padding:5px 10px;font-size:13px;font-weight:700;cursor:pointer}
+.me-too-btn.active{background:var(--sel);color:#fff;border-color:var(--sel)}
+
+
+.choice-disabled{
+  opacity:.28 !important;
+  filter:grayscale(.65);
+  cursor:not-allowed !important;
+  pointer-events:none !important;
+}
+
+
+.choice.choice-disabled,.choice:disabled{
+ opacity:.22 !important;
+ filter:grayscale(.8);
+ cursor:not-allowed !important;
+ box-shadow:none !important;
+}
+
+
+.travel-destination-input{
+ width:150px; min-width:110px; border:2px solid var(--line); border-radius:8px;
+ padding:7px 9px; font-size:16px; font-family:inherit; outline:none; background:#fff;
+ color:#234f63;
+ -webkit-text-fill-color:#234f63;
+ text-align:center;
+ opacity:1;
+}
+.travel-destination-input::placeholder{
+ color:#888;
+ -webkit-text-fill-color:#888;
+ opacity:1;
+}
+.travel-destination-input:focus{border-color:var(--sel)}
+.posted-destination{background:#fff;border:1px solid var(--line)}
+
+/* 名前入力欄：白塗り */
+#nameInput{
+ background:#fff !important;
+ background-color:#fff !important;
+ color:#234f63 !important;
+ -webkit-text-fill-color:#234f63 !important;
+ opacity:1 !important;
+}
+#nameInput::placeholder{
+ color:#888 !important;
+ -webkit-text-fill-color:#888 !important;
+ opacity:1 !important;
+}
+
+
+/* しゅうまつ／ごご 切り替え */
+.mode-switch-wrap{
+ display:flex;
+ justify-content:flex-start;
+ margin:0 0 9px 2px;
+}
+.mode-switch{
+ display:inline-flex;
+ align-items:center;
+ gap:3px;
+ padding:3px;
+ background:#fff;
+ border:1.5px solid #9bcbe0;
+ border-radius:999px;
+ box-shadow:0 2px 7px rgba(63,126,46,.10);
+}
+.mode-switch-btn{
+ border:0;
+ background:transparent;
+ color:#62825a;
+ border-radius:999px;
+ padding:6px 13px;
+ font-family:inherit;
+ font-size:14px;
+ font-weight:700;
+ line-height:1;
+ cursor:pointer;
+ transition:.15s ease;
+}
+.mode-switch-btn.active{
+ background:#6db9dc;
+ color:#fff;
+ box-shadow:0 1px 4px rgba(63,126,46,.18);
+}
+
+
+/* ===== v92 縦方向をできるだけコンパクトに ===== */
+.app{padding-top:4px!important;padding-bottom:8px!important}
+.board-title{margin-bottom:1px!important}
+.feed{height:205px!important;padding:3px!important;gap:2px!important}
+.composer{margin-top:4px!important;padding:5px!important}
+.guide{margin-bottom:1px!important;line-height:1.15!important}
+.mode-switch-wrap{margin:0 0 3px 1px!important}
+.mode-switch{padding:2px!important}
+.mode-switch-btn{padding:4px 10px!important}
+.question{margin:1px 0 2px!important;line-height:1.15!important}
+
+.preview{
+ min-height:30px!important;
+ margin:0!important;
+ padding-bottom:9px!important;
+ line-height:1!important;
+}
+.second-stage{margin-top:0!important}
+.second-preview{
+ min-height:30px!important;
+ margin:0!important;
+ padding-bottom:9px!important;
+}
+.preview-place,.second-place{
+ padding-top:3px!important;
+ padding-bottom:3px!important;
+ margin-bottom:0!important;
+}
+.preview-cn,.second-cn{top:calc(100% + 1px)!important}
+
+.place-box{padding:4px!important}
+.place-box.has-de-hint{padding-bottom:24px!important}
+.first-stage-de-hint{bottom:3px!important;font-size:18px!important}
+
+.choices{gap:2px!important}
+.choice{min-height:32px!important;padding:2px 1px!important}
+.jp{line-height:1!important}
+.cn{margin-top:1px!important;line-height:1!important}
+
+.noun-area{
+ margin-top:2px!important;
+ gap:2px!important;
+ padding:4px!important;
+ padding-bottom:20px!important;
+}
+.noun-choice{min-height:31px!important}
+.noun-area-hint{bottom:3px!important;font-size:18px!important}
+
+.inside-patterns{margin-top:2px!important;padding-top:2px!important}
+.patterns{margin-top:2px!important}
+
+.post{padding:2px 4px!important}
+.post-line,.posted-row{
+ min-height:31px!important;
+ padding-top:0!important;
+ padding-bottom:8px!important;
+}
+.post-author{margin-bottom:1px!important}
+.posted-sentence{line-height:1.25!important}
+.posted-row{gap:2px!important}
+.posted-card,.post-place{padding-top:3px!important;padding-bottom:3px!important}
+.me-too-wrap{margin-top:1px!important}
+
+@media(max-width:700px){
+ .app{padding-top:2px!important;padding-bottom:5px!important}
+ .feed{height:185px!important}
+ .composer{margin-top:3px!important;padding:4px!important}
+ .mode-switch-wrap{margin-bottom:2px!important}
+ .mode-switch-btn{padding:3px 9px!important}
+ .question{margin:1px 0!important}
+ .preview,.second-preview{min-height:27px!important;padding-bottom:8px!important}
+ .place-box{padding:3px!important}
+ .place-box.has-de-hint{padding-bottom:22px!important}
+ .choice{min-height:29px!important}
+ .noun-area{margin-top:1px!important;padding:3px!important;padding-bottom:19px!important}
+ .noun-choice{min-height:29px!important}
+ .post-line,.posted-row{min-height:29px!important;padding-bottom:8px!important}
+}
+
+
+/* ===== v93 重なり防止・適度にコンパクト ===== */
+.feed{height:230px!important;padding:5px!important;gap:4px!important}
+.composer{margin-top:6px!important;padding:7px!important}
+.guide{margin-bottom:4px!important;line-height:1.3!important}
+.mode-switch-wrap{margin:0 0 6px 2px!important}
+.mode-switch-btn{padding:5px 11px!important}
+.question{margin:3px 0 5px!important;line-height:1.3!important}
+
+.preview,.second-preview{
+ min-height:38px!important;
+ padding-bottom:13px!important;
+ line-height:1.2!important;
+}
+.second-stage{margin-top:3px!important}
+.preview-place,.second-place{padding-top:5px!important;padding-bottom:5px!important}
+.preview-cn,.second-cn{top:calc(100% + 2px)!important}
+
+.place-box{padding:6px!important}
+.place-box.has-de-hint{padding-bottom:30px!important}
+.first-stage-de-hint{bottom:5px!important;font-size:19px!important}
+
+.choices{gap:4px!important}
+.choice{min-height:39px!important;padding:4px 2px!important}
+.jp{line-height:1.15!important}
+.cn{margin-top:2px!important;line-height:1.1!important}
+
+.noun-area{
+ margin-top:4px!important;
+ gap:4px!important;
+ padding:6px!important;
+ padding-bottom:26px!important;
+}
+.noun-choice{min-height:38px!important}
+.noun-area-hint{bottom:5px!important;font-size:19px!important}
+
+.inside-patterns,.patterns{margin-top:4px!important;padding-top:3px!important}
+
+.post{padding:4px 6px!important}
+.post-line,.posted-row{
+ min-height:38px!important;
+ padding-bottom:12px!important;
+ line-height:1.15!important;
+}
+.posted-row{gap:3px!important}
+.posted-card,.post-place{padding-top:5px!important;padding-bottom:5px!important}
+.me-too-wrap{margin-top:3px!important}
+
+@media(max-width:700px){
+ .feed{height:215px!important}
+ .composer{padding:6px!important}
+ .preview,.second-preview{min-height:36px!important;padding-bottom:12px!important}
+ .choice,.noun-choice{min-height:36px!important}
+ .noun-area{padding-bottom:25px!important}
+ .post-line,.posted-row{min-height:36px!important;padding-bottom:11px!important}
+}
+
+
+/* ===== v95 切替ボタンと疑問文の高さを統一 ===== */
+.mode-switch{
+ height:36px!important;
+ box-sizing:border-box!important;
+}
+.mode-switch-btn{
+ height:30px!important;
+ box-sizing:border-box!important;
+ padding:0 11px!important;
+ display:flex!important;
+ align-items:center!important;
+ justify-content:center!important;
+ line-height:1!important;
+}
+.question{
+ height:36px!important;
+ min-height:36px!important;
+ box-sizing:border-box!important;
+ display:flex!important;
+ align-items:center!important;
+ margin:3px 0 5px!important;
+ line-height:1!important;
+}
+@media(max-width:700px){
+ .mode-switch{height:34px!important}
+ .mode-switch-btn{height:28px!important}
+ .question{height:34px!important;min-height:34px!important}
+}
+
+
+/* ===== v96 切替と疑問文を横並び ===== */
+.mode-question-row{
+ display:flex!important;
+ align-items:center!important;
+ justify-content:flex-start!important;
+ gap:10px!important;
+ margin:0 0 5px 0!important;
+}
+.mode-switch-wrap{
+ margin:0!important;
+ flex:0 0 auto!important;
+}
+.question{
+ margin:0!important;
+ flex:0 0 auto!important;
+}
+@media(max-width:700px){
+ .mode-question-row{
+   gap:8px!important;
+   flex-wrap:nowrap!important;
+ }
+}
+
+
+/* v97 responsive 私も */
+.post{position:relative!important}
+.me-too-wrap{display:flex!important;align-items:center!important;gap:5px!important;width:max-content!important;max-width:100%!important}
+.post.metoo-inline .me-too-wrap{position:absolute!important;right:6px!important;bottom:4px!important;margin:0!important}
+.post.metoo-row2 .me-too-wrap,.post.metoo-row3 .me-too-wrap{position:static!important;margin-top:3px!important;margin-left:auto!important}
+.post.metoo-row2 .me-too-count{position:absolute!important;right:6px!important;top:4px!important}
+.post.metoo-row3 .me-too-count,.post.metoo-inline .me-too-count{position:static!important}
+
+
+/* ===== v98 私も配置・実測版 ===== */
+.post{position:relative!important}
+.me-too-wrap{box-sizing:border-box!important}
+
+.post.metoo-inline .me-too-wrap{
+ position:absolute!important;
+ margin:0!important;
+ z-index:3!important;
+}
+.post.metoo-row2 .me-too-wrap,
+.post.metoo-row3 .me-too-wrap{
+ position:relative!important;
+ left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;
+ margin:3px 0 0 auto!important;
+ width:max-content!important;
+}
+.post.metoo-row2 .me-too-count{
+ position:absolute!important;
+ z-index:4!important;
+}
+.post.metoo-row3 .me-too-count,
+.post.metoo-inline .me-too-count{
+ position:static!important;
+}
+
+
+/* v100: 私もが2段目のとき、✋×Nは一段目の右端 */
+.post.metoo-row2 .me-too-count{
+ left:auto!important;
+ right:6px!important;
+ bottom:auto!important;
+ margin:0!important;
+}
+
+
+/* v101: 2段目時のカウントは post 直下。一段目右端に固定 */
+.post.metoo-row2 > .me-too-count{
+ position:absolute!important;
+ left:auto!important;
+ right:6px!important;
+ z-index:10!important;
+ margin:0!important;
+}
+
+
+/* ===== v102：2段目のときの✋×Nは「1段目そのもの」の右端 ===== */
+.post.metoo-row2 .posted-row:first-child{
+ position:relative!important;
+ padding-right:52px!important;
+}
+.post.metoo-row2 .posted-row:first-child > .me-too-count{
+ position:absolute!important;
+ right:0!important;
+ left:auto!important;
+ top:50%!important;
+ bottom:auto!important;
+ transform:translateY(-50%)!important;
+ margin:0!important;
+ z-index:10!important;
+ white-space:nowrap!important;
+}
+
+
+/* ===== v103：2段目時の✋×Nは右端に独立表示 ===== */
+.post.metoo-row2 .posted-row:first-child{
+ padding-right:0!important;
+}
+.post.metoo-row2 .posted-row:first-child > .me-too-count{
+ position:absolute!important;
+ right:6px!important;
+ left:auto!important;
+ top:3px!important;
+ transform:none!important;
+ margin:0!important;
+ z-index:10!important;
+ white-space:nowrap!important;
+}
+
+
+/* ===== v104 最終指定 ===== */
+.post.metoo-row2 > .me-too-count{
+ position:absolute!important;
+ right:6px!important;
+ left:auto!important;
+ bottom:auto!important;
+ transform:none!important;
+ margin:0!important;
+ z-index:20!important;
+ white-space:nowrap!important;
+}
+.post.metoo-row2 .posted-row:first-child{
+ padding-right:0!important;
+}
+
+
+/* v105: 私もが2段目なら count は必ず1段目右端 */
+.post.metoo-inline > .me-too-count,
+.post.metoo-row2 > .me-too-count{
+ position:absolute!important;
+ right:6px!important;
+ left:auto!important;
+ z-index:30!important;
+ white-space:nowrap!important;
+}
+
+
+/* ===== v106：✋×N は行レイアウトに一切参加させない ===== */
+.post.metoo-inline > .me-too-count,
+.post.metoo-row2 > .me-too-count{
+ position:absolute!important;
+ display:block!important;
+ width:max-content!important;
+ max-width:none!important;
+ right:6px!important;
+ left:auto!important;
+ bottom:auto!important;
+ margin:0!important;
+ padding:0!important;
+ transform:none!important;
+ z-index:30!important;
+ white-space:nowrap!important;
+ pointer-events:none!important;
+}
+.post.metoo-inline .posted-row,
+.post.metoo-row2 .posted-row{
+ flex-wrap:nowrap!important;
+}
+
+
+/* ===== v107：私もボタンは常に右詰め ===== */
+.me-too-wrap{
+ margin-left:auto!important;
+ margin-right:0!important;
+ justify-content:flex-end!important;
+}
+.post.metoo-inline .me-too-wrap{
+ left:auto!important;
+ right:6px!important;
+}
+.post.metoo-row2 .me-too-wrap,
+.post.metoo-row3 .me-too-wrap{
+ margin-left:auto!important;
+ margin-right:0!important;
+}
+
+
+/* ===== v108：✋×N は常に一段目の右端 ===== */
+.post > .me-too-count{
+ position:absolute!important;
+ right:6px!important;
+ left:auto!important;
+ bottom:auto!important;
+ margin:0!important;
+ transform:none!important;
+ z-index:40!important;
+ white-space:nowrap!important;
+ pointer-events:none!important;
+}
+
+
+/* ===== v109：✋×N 最終固定 ===== */
+.post{position:relative!important}
+.post > .me-too-count{
+ position:absolute!important;
+ right:6px!important;
+ left:auto!important;
+ bottom:auto!important;
+ margin:0!important;
+ transform:none!important;
+ display:block!important;
+ width:max-content!important;
+ white-space:nowrap!important;
+ z-index:99!important;
+ pointer-events:none!important;
+}
+
+
+/* ===== 出身ページ ===== */
+.shusshin-answer{display:flex;align-items:center;gap:6px;font-size:20px;font-weight:700;margin:5px 0}
+.shusshin-input{width:190px!important}
+.shusshin-second{display:none;margin-top:8px}
+.shusshin-preview{display:flex!important;align-items:center!important;gap:5px!important;min-height:42px!important}
+.shusshin-choices{margin-top:5px}
+.post-btn{margin-top:8px}
+.name-modal{position:fixed;inset:0;background:rgba(30,70,90,.22);display:flex;align-items:center;justify-content:center;z-index:9999}
+.name-box{background:#f7fcff;border:2px solid #9bcbe0;border-radius:16px;padding:18px;min-width:280px;text-align:center;box-shadow:0 8px 25px rgba(40,107,138,.16)}
+.name-title{font-weight:700;margin-bottom:10px}
+#nameInput{width:100%;background:#fff!important;color:#234f63!important;-webkit-text-fill-color:#234f63!important;border:2px solid #9bcbe0;border-radius:9px;padding:9px;text-align:center;font:inherit}
+#nameOk{margin-top:10px;border:0;border-radius:9px;background:#6db9dc;color:#fff;padding:8px 22px;font:inherit;font-weight:700}
+
+
+/* v4: 質問・入力を前ページと同じ中央寄せ */
+.question{
+  text-align:center !important;
+  margin-left:auto !important;
+  margin-right:auto !important;
+}
+.shusshin-answer{
+  justify-content:center !important;
+  width:100% !important;
+  margin-left:auto !important;
+  margin-right:auto !important;
+}
+.shusshin-input{
+  text-align:center !important;
+}
+.shusshin-preview{
+  justify-content:center !important;
+  width:100% !important;
+}
+
+
+/* v5: 前サイトと同じ選択カード・投稿ボタン */
+#shusshinAdjPreview{
+ display:inline-flex;
+ align-items:center;
+ gap:3px;
+}
+.shusshin-adj-card{
+ position:relative;
+ display:inline-flex;
+ align-items:center;
+ justify-content:center;
+ background:var(--area);
+ color:#234f63;
+ border-radius:7px;
+ padding:5px 7px;
+ line-height:1;
+ flex:0 0 auto;
+ margin-bottom:11px;
+}
+#postBtn{
+ display:block !important;
+ width:auto !important;
+ min-width:92px !important;
+ margin:10px auto 0 !important;
+}
+#postBtn:disabled{
+ opacity:.42 !important;
+ cursor:not-allowed !important;
+}
+
+
+/* v6: 前サイトと同じ完成文＋投稿ボタン配置 */
+.question{
+ text-align:center !important;
+}
+.shusshin-preview{
+ justify-content:center !important;
+ align-items:center !important;
+ padding-bottom:11px !important;
+}
+.shusshin-preview .preview-place,
+.shusshin-preview .posted-card{
+ margin-bottom:0 !important;
+}
+#postBtn{
+ display:inline-block !important;
+ width:auto !important;
+ min-width:0 !important;
+ margin:0 0 0 4px !important;
+ flex:0 0 auto !important;
+}
+/* 訳はレイアウト領域を取らない＝本文が上下左右にずれない */
+.shusshin-preview .preview-cn,
+.shusshin-preview .posted-cn,
+.posted-row .posted-cn{
+ position:absolute !important;
+ left:0 !important;
+ right:0 !important;
+ top:calc(100% + 2px) !important;
+ text-align:center !important;
+ line-height:1 !important;
+ white-space:nowrap !important;
+}
+.posted-row{
+ padding-bottom:11px !important;
+ align-items:center !important;
+}
+
+
+/* v8: 1行目＝疑問文＋入力＋です。／2行目＝どんなところ */
+.shusshin-question-row{
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ gap:7px;
+ width:100%;
+ font-size:20px;
+ font-weight:700;
+ margin:4px auto 8px;
+ white-space:nowrap;
+}
+.shusshin-question-row .question{
+ margin:0 !important;
+ width:auto !important;
+ flex:0 0 auto;
+}
+.shusshin-question-row .shusshin-input{
+ width:170px !important;
+ flex:0 1 170px;
+}
+.answer-desu{flex:0 0 auto}
+.second-question{
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ gap:5px;
+ min-height:40px;
+ font-size:20px;
+ font-weight:700;
+ margin:3px auto 4px;
+ padding-bottom:11px;
+}
+.second-question .preview-place{
+ position:relative;
+ display:inline-flex;
+ align-items:center;
+ justify-content:center;
+ background:var(--area);
+ border-radius:7px;
+ padding:5px 7px;
+ line-height:1;
+}
+@media(max-width:600px){
+ .shusshin-question-row{font-size:17px;gap:4px}
+ .shusshin-question-row .shusshin-input{width:115px !important;flex-basis:115px}
+ .second-question{font-size:18px}
+}
+
+
+/* v9: 質問は左揃え／回答は端末幅に応じて同じ開始位置 */
+.shusshin-question-row,
+.second-question,
+.shusshin-preview{
+ width:min(100%, 720px) !important;
+ margin-left:auto !important;
+ margin-right:auto !important;
+ justify-content:flex-start !important;
+}
+
+/* 1行目・2行目の質問は左詰め */
+.shusshin-question-row{
+ text-align:left !important;
+}
+.shusshin-question-row .question{
+ text-align:left !important;
+}
+
+/* 2行目の手入力地名は質問なのでカード色なし */
+.second-question .preview-place{
+ background:transparent !important;
+ border-radius:0 !important;
+ padding:0 !important;
+ color:inherit !important;
+}
+
+/* 回答文の開始位置を質問文と共通化 */
+.shusshin-preview{
+ text-align:left !important;
+}
+
+/* 回答側の手入力地名はカードだが、訳は持たない */
+#shusshinSubjectAnswer{
+ position:relative;
+ display:inline-flex;
+ align-items:center;
+ justify-content:center;
+ background:var(--area);
+ border-radius:7px;
+ padding:5px 7px;
+ line-height:1;
+}
+
+/* 端末幅に合わせて左右余白を自動調整 */
+@media(max-width:760px){
+ .shusshin-question-row,
+ .second-question,
+ .shusshin-preview{
+   width:100% !important;
+ }
+}
+
+
+/* v10: 左詰め＋端末ごとの共通開始位置／2文目Q&Aを同じ行 */
+.shusshin-question-row,
+.second-line{
+ width:min(100%,720px) !important;
+ margin-left:auto !important;
+ margin-right:auto !important;
+}
+.shusshin-question-row{
+ justify-content:flex-start !important;
+ text-align:left !important;
+}
+.second-line{
+ display:flex !important;
+ align-items:center !important;
+ justify-content:flex-start !important;
+ gap:18px !important;
+ flex-wrap:wrap !important;
+}
+.second-line .second-question,
+.second-line .shusshin-preview{
+ width:auto !important;
+ margin:0 !important;
+ justify-content:flex-start !important;
+ flex:0 0 auto;
+}
+.second-line .second-question{
+ padding-bottom:0 !important;
+}
+.second-line .shusshin-preview{
+ padding-bottom:11px !important;
+}
+@media(max-width:760px){
+ .shusshin-question-row,
+ .second-line{width:100% !important}
+ .second-line{gap:10px !important}
+}
+/* 投稿文が狭い端末でも自然に折り返す */
+.posted-row{
+ white-space:normal !important;
+ flex-wrap:wrap !important;
+ row-gap:3px !important;
+}
+
+
+/* v11: 疑問文をカード内の本当の左端へ固定 */
+.shusshin-question-row,
+.second-line{
+ width:100% !important;
+ max-width:none !important;
+ margin-left:0 !important;
+ margin-right:0 !important;
+ padding-left:0 !important;
+ justify-content:flex-start !important;
+ text-align:left !important;
+}
+.shusshin-question-row .question{
+ text-align:left !important;
+ margin-left:0 !important;
+ margin-right:0 !important;
+}
+.second-line{
+ align-items:center !important;
+}
+
+
+/* v12: な形容詞の「な」カード */
+.na-card{
+ display:inline-flex;
+ align-items:center;
+ justify-content:center;
+ background:#f8dfe7;
+ color:#7a4053;
+ border-radius:7px;
+ padding:5px 7px;
+ line-height:1;
+ flex:0 0 auto;
+}
+
+
+/* v13: 「な」はさらに薄いピンク／形容詞は2個まで */
+.na-card{
+ background:#fff1f5 !important;
+ color:#7a5964 !important;
+}
+#shusshinAdjPreview{
+ display:flex !important;
+ flex-wrap:wrap !important;
+ align-items:center !important;
+}
+.adj-answer-line{
+ display:inline-flex;
+ align-items:center;
+ gap:3px;
+ flex:0 0 auto;
+}
+.adj-answer-line:nth-child(2){
+ flex-basis:100%;
+ margin-top:5px;
+}
+.repeat-subject{
+ display:inline-flex;
+ align-items:center;
+ gap:3px;
+ margin-right:3px;
+}
+.post-second-answer{
+ display:flex;
+ align-items:center;
+ gap:3px;
+ flex-basis:100%;
+ margin-top:4px;
+}
+
+
+/* v14: 2個目は主語なし。開始位置は1個目の形容詞と揃える */
+.adj-answer-line:nth-child(2),
+.post-second-answer{
+ box-sizing:border-box;
+}
+.repeat-subject{display:none !important;}
+
+
+/* v16: 2文目の位置をCSSグリッドで確実に揃える */
+.shusshin-preview{
+ display:grid !important;
+ grid-template-columns:max-content max-content 1fr max-content !important;
+ column-gap:3px !important;
+ align-items:center !important;
+}
+#shusshinSubjectAnswer{grid-column:1}
+.shusshin-preview > #shusshinSubjectAnswer + span{grid-column:2}
+#shusshinAdjPreview{
+ grid-column:3;
+ display:grid !important;
+ grid-template-columns:1fr !important;
+ row-gap:5px !important;
+ align-items:center !important;
+}
+#shusshinAdjPreview .adj-answer-line{
+ display:flex !important;
+ align-items:center !important;
+ gap:3px !important;
+ padding-left:0 !important;
+ margin:0 !important;
+}
+#shusshinAdjPreview .adj-answer-line:nth-child(2){
+ grid-row:2;
+}
+#postBtn{
+ grid-column:4 !important;
+ grid-row:1 !important;
+ align-self:center !important;
+}
+
+/* 投稿後：2個目は1個目の形容詞開始位置に合わせる */
+.posted-row{
+ display:grid !important;
+ grid-template-columns:max-content max-content max-content max-content max-content max-content 1fr !important;
+ column-gap:3px !important;
+ align-items:center !important;
+}
+.posted-row .post-second-answer{
+ grid-column:7 !important;
+ display:flex !important;
+ align-items:center !important;
+ gap:3px !important;
+ padding-left:0 !important;
+ margin:4px 0 0 0 !important;
+}
+
+
+/* v17: 2個目の回答は完全に次の行へ */
+.shusshin-preview{
+ display:flex !important;
+ flex-wrap:wrap !important;
+ align-items:center !important;
+ gap:3px !important;
+}
+#shusshinSubjectAnswer,
+.shusshin-preview > #shusshinSubjectAnswer + span,
+#shusshinAdjPreview,
+#postBtn{
+ grid-column:auto !important;
+ grid-row:auto !important;
+}
+#shusshinAdjPreview{
+ display:contents !important;
+}
+#shusshinAdjPreview .adj-answer-line{
+ display:inline-flex !important;
+ align-items:center !important;
+ gap:3px !important;
+ padding-left:0 !important;
+ margin:0 !important;
+}
+#shusshinAdjPreview .adj-answer-line:nth-child(2){
+ flex-basis:100% !important;
+ width:100% !important;
+ margin-top:5px !important;
+}
+/* 2個目は主語なしで、行頭から書く */
+#shusshinAdjPreview .adj-answer-line:nth-child(2){
+ padding-left:0 !important;
+}
+/* 投稿後も2個目を完全に次行へ */
+.posted-row{
+ display:flex !important;
+ flex-wrap:wrap !important;
+ align-items:center !important;
+ gap:3px !important;
+}
+.posted-row .post-second-answer{
+ display:flex !important;
+ flex-basis:100% !important;
+ width:100% !important;
+ align-items:center !important;
+ gap:3px !important;
+ padding-left:0 !important;
+ margin-top:5px !important;
+}
+
+
+/* v18: 2個目の行頭＝1行目の入力欄の左端 */
+#shusshinAdjPreview .adj-answer-line:nth-child(2){
+ width:auto !important;
+ padding-left:0 !important;
+}
+
+
+/* v19: 1段目の疑問文は絶対に改行させない */
+.shusshin-question-row{
+ display:flex !important;
+ flex-wrap:nowrap !important;
+ white-space:nowrap !important;
+ overflow:visible !important;
+ width:100% !important;
+}
+.shusshin-question-row .question,
+.shusshin-question-row .answer-desu{
+ flex:0 0 auto !important;
+ white-space:nowrap !important;
+}
+/* 入力欄だけ端末幅に応じて縮む。疑問文は落とさない */
+.shusshin-question-row .shusshin-input{
+ flex:1 1 auto !important;
+ min-width:70px !important;
+ max-width:190px !important;
+}
+
+/* 2文目は完全な次行。左端はJSで1段目入力欄と実測一致 */
+#shusshinAdjPreview .adj-answer-line:nth-child(2){
+ flex-basis:100% !important;
+ width:max-content !important;
+ max-width:calc(100% - 4px) !important;
+ box-sizing:border-box !important;
+ white-space:nowrap !important;
+}
+@media(max-width:600px){
+ .shusshin-question-row{
+   font-size:15px !important;
+   gap:3px !important;
+ }
+ .shusshin-question-row .shusshin-input{
+   min-width:62px !important;
+ }
+}
+
+
+/* v20: 疑問文＋入力＋です。は必ず一段目 */
+.shusshin-question-row{
+ display:grid !important;
+ grid-template-columns:max-content minmax(55px,190px) max-content !important;
+ align-items:center !important;
+ justify-content:start !important;
+ column-gap:5px !important;
+ flex-wrap:nowrap !important;
+ white-space:nowrap !important;
+}
+.shusshin-question-row .question{
+ grid-column:1 !important;
+ white-space:nowrap !important;
+}
+.shusshin-question-row .shusshin-input{
+ grid-column:2 !important;
+ width:100% !important;
+ min-width:55px !important;
+ max-width:190px !important;
+}
+.shusshin-question-row .answer-desu{
+ grid-column:3 !important;
+ white-space:nowrap !important;
+}
+
+/* 画面が狭くても疑問文自体を次行へ落とさない */
+@media(max-width:520px){
+ .shusshin-question-row{
+   font-size:14px !important;
+   column-gap:3px !important;
+   grid-template-columns:max-content minmax(48px,1fr) max-content !important;
+ }
+}
+
+/* 2個目は必ず独立した次行。X位置だけJSで入力欄左端に一致 */
+#shusshinAdjPreview .adj-answer-line:nth-child(2){
+ flex-basis:100% !important;
+ display:flex !important;
+ width:max-content !important;
+ margin-left:0 !important;
+ white-space:nowrap !important;
+}
+
+
+/* v21: 位置計算を廃止。全行を同じ2カラムで固定 */
+.qa-grid{
+ display:grid !important;
+ grid-template-columns:max-content minmax(0,1fr) !important;
+ column-gap:10px !important;
+ row-gap:8px !important;
+ align-items:center !important;
+ width:100% !important;
+}
+.q-cell{
+ grid-column:1 !important;
+ white-space:nowrap !important;
+ text-align:left !important;
+ font-size:20px !important;
+ font-weight:700 !important;
+ line-height:1.2 !important;
+}
+.a-cell{
+ grid-column:2 !important;
+ display:flex !important;
+ align-items:center !important;
+ justify-content:flex-start !important;
+ gap:4px !important;
+ min-width:0 !important;
+ white-space:nowrap !important;
+ font-size:20px !important;
+ font-weight:700 !important;
+}
+.q1{grid-row:1 !important}
+.a1{grid-row:1 !important}
+.qa-contents{display:contents}
+.q2{grid-row:2 !important}
+.a2{
+ grid-row:2 !important;
+ flex-wrap:wrap !important;
+}
+.a1 .shusshin-input{
+ width:min(190px,100%) !important;
+ min-width:60px !important;
+ flex:0 1 190px !important;
+}
+/* 選択回答：1個目は2文目疑問文と同じ行、2個目だけ次行。
+   どちらも入力欄と同じ第2カラム左端から開始 */
+#a2{}
+#shusshinAdjPreview{
+ display:contents !important;
+}
+.a2 .adj-answer-line{
+ display:inline-flex !important;
+ align-items:center !important;
+ gap:3px !important;
+ margin:0 !important;
+ transform:none !important;
+ padding:0 !important;
+}
+.a2 .adj-answer-line:nth-child(2){
+ flex-basis:100% !important;
+ width:100% !important;
+ margin-left:0 !important;
+ transform:none !important;
+}
+@media(max-width:600px){
+ .qa-grid{
+   column-gap:5px !important;
+ }
+ .q-cell,.a-cell{
+   font-size:15px !important;
+ }
+ .a1 .shusshin-input{
+   width:100% !important;
+   min-width:45px !important;
+ }
+}
+/* 1段目は絶対に折り返さない */
+.q1,.a1,.a1 *{
+ white-space:nowrap !important;
+}
+
+
+/* v22: 訳でカード本体が上に動かない */
+.a2{
+ align-items:center !important;
+ padding-bottom:12px !important;
+}
+.a2 .posted-card,
+.a2 .shusshin-adj-card,
+.a2 .na-card{
+ margin-top:0 !important;
+ margin-bottom:0 !important;
+ align-self:center !important;
+}
+.a2 .posted-cn{
+ position:absolute !important;
+ top:calc(100% + 2px) !important;
+ bottom:auto !important;
+ left:0 !important;
+ right:0 !important;
+ transform:none !important;
+ line-height:1 !important;
+ pointer-events:none !important;
+}
+/* 2個目もカード本体の高さを基準にする */
+.a2 .adj-answer-line{
+ min-height:29px !important;
+ align-items:center !important;
+}
+
+
+/* v23: 发布は1行目右／2行目疑問文は訳の余白で下げない */
+.a1{
+ position:relative !important;
+ padding-right:72px !important;
+}
+.a1 #postBtn{
+ position:absolute !important;
+ right:0 !important;
+ top:50% !important;
+ transform:translateY(-50%) !important;
+ margin:0 !important;
+ white-space:nowrap !important;
+}
+
+/* 2行目の疑問文は通常の行位置に固定 */
+.q2{
+ align-self:center !important;
+ margin:0 !important;
+ padding:0 !important;
+ transform:none !important;
+}
+/* 訳のための下余白は回答側だけ。疑問文の行位置には影響させない */
+.a2{
+ align-self:start !important;
+ padding-top:0 !important;
+ margin-top:0 !important;
+}
+
+
+/* v24: 2行目疑問文を上端固定。訳の高さに絶対引っ張られない */
+.q2{
+ align-self:start !important;
+ margin-top:0 !important;
+ padding-top:5px !important;
+ padding-bottom:0 !important;
+ line-height:1 !important;
+}
+.a2{
+ align-self:start !important;
+ margin-top:0 !important;
+}
+/* グリッド行自体も上揃え */
+.qa-grid{
+ align-items:start !important;
+}
+.q1,.a1{
+ align-self:center !important;
+}
+
+
+/* v25: 发布は「です。」のすぐ後ろ */
+.a1{
+ padding-right:0 !important;
+}
+.a1 #postBtn{
+ position:static !important;
+ right:auto !important;
+ top:auto !important;
+ transform:none !important;
+ margin:0 0 0 5px !important;
+ flex:0 0 auto !important;
+}
+
+
+/* v26: 3行目＋ボタン群をテーブルごとに色分け */
+.q3{grid-row:3 !important;align-self:start !important;padding-top:5px !important}
+.a3{
+ grid-row:3 !important;
+ align-self:start !important;
+ padding-bottom:12px !important;
+}
+#thingPreview{display:inline-flex;align-items:center}
+.thing-card{margin:0 !important}
+
+/* 選択肢グループを別色のテーブルに */
+.choice-table{
+ margin-top:10px;
+ padding:9px;
+ border-radius:13px;
+ border:2px solid;
+}
+.table-label{
+ font-size:14px;
+ font-weight:700;
+ margin:0 0 7px 2px;
+}
+.adjective-table{
+ background:#e8f6fc;
+ border-color:#9bcbe0;
+}
+.thing-table{
+ background:#fff4df;
+ border-color:#e8c98e;
+}
+.thing-table .choice{
+ background:#fffaf0;
+ border-color:#e8c98e;
+ color:#6d552a;
+}
+.thing-table .choice.selected{
+ background:#e8c98e;
+ border-color:#d9b66f;
+ color:#fff;
+}
+
+/* 投稿の3文目は必ず次行 */
+.post-third-line{
+ display:flex;
+ flex-basis:100%;
+ width:100%;
+ align-items:center;
+ gap:3px;
+ margin-top:5px;
+ padding-bottom:11px;
+}
+
+
+/* v28: 回答文は選択されるまで仮表示しない */
+.a2{visibility:hidden;}
+.a3{visibility:hidden;}
+
+
+/* v29: 手入力した地名は色カードにしない */
+.posted-place-plain,
+.preview-place{
+ background:transparent !important;
+ border:none !important;
+ box-shadow:none !important;
+ padding:0 !important;
+ border-radius:0 !important;
+ color:inherit !important;
+}
+
+
+/* v32: 3行目回答後に4行目の名称入力 */
+.q4{
+ grid-row:4 !important;
+ min-height:1px !important;
+}
+.a4{
+ grid-row:4 !important;
+ align-self:start !important;
+ white-space:nowrap !important;
+}
+.thing-name-input{
+ width:190px !important;
+ max-width:100% !important;
+}
+
+
+/* v36 安定修正版：カード構造は変えず、訳だけ重ならないようにする */
+.a2{
+ padding-bottom:18px !important;
+}
+.a3{
+ padding-bottom:18px !important;
+}
+.a2 .posted-card,
+.a3 .posted-card,
+.a3 .thing-card{
+ position:relative !important;
+ overflow:visible !important;
+ margin-top:0 !important;
+ margin-bottom:0 !important;
+ padding-bottom:0 !important;
+ vertical-align:middle !important;
+}
+.a2 .posted-cn,
+.a3 .posted-cn{
+ position:absolute !important;
+ top:calc(100% + 3px) !important;
+ bottom:auto !important;
+ left:50% !important;
+ right:auto !important;
+ transform:translateX(-50%) !important;
+ white-space:nowrap !important;
+ line-height:1 !important;
+ z-index:2 !important;
+}
+.a2 .adj-answer-line:nth-child(2){
+ margin-top:18px !important;
+}
+
+/* 名称欄は3行目が選択されるまでは確実に非表示 */
+.q4,.a4{display:none;}
+
+
+/* v37: 入力欄をコンパクトに。名称は前の回答文と同じ行 */
+.shusshin-input{
+ width:120px !important;
+ min-width:90px !important;
+ flex:0 0 120px !important;
+ padding:6px 9px !important;
+}
+.thing-name-input{
+ width:120px !important;
+ min-width:90px !important;
+ max-width:120px !important;
+ padding:6px 9px !important;
+}
+.name-inline{
+ display:none;
+ align-items:center;
+ gap:3px;
+ margin-left:7px;
+ white-space:nowrap;
+}
+/* 旧4行目は使わない */
+.q4,.a4{display:none !important;}
+@media(max-width:600px){
+ .shusshin-input,.thing-name-input{
+   width:105px !important;
+   min-width:80px !important;
+   max-width:105px !important;
+   flex-basis:105px !important;
+ }
+}
+
+
+/* v38: 回答文を5px右へ／出身地入力をさらに短く */
+.a1,.a2,.a3{
+ transform:translateX(5px) !important;
+}
+.shusshin-input{
+ width:95px !important;
+ min-width:75px !important;
+ max-width:95px !important;
+ flex:0 0 95px !important;
+}
+@media(max-width:600px){
+ .shusshin-input{
+   width:90px !important;
+   min-width:70px !important;
+   max-width:90px !important;
+   flex-basis:90px !important;
+ }
+}
+
+
+/* v39: 回答文の開始を約4文字分右へ。出身地入力は短すぎない長さへ */
+.a1,.a2,.a3{
+ transform:translateX(4em) !important;
+}
+.shusshin-input{
+ width:135px !important;
+ min-width:110px !important;
+ max-width:135px !important;
+ flex:0 0 135px !important;
+}
+@media(max-width:600px){
+ .shusshin-input{
+   width:125px !important;
+   min-width:105px !important;
+   max-width:125px !important;
+   flex-basis:125px !important;
+ }
+}
+
+
+/* v40: 回答文の開始位置を固定（出身入力欄の長さに依存させない） */
+.qa-grid{
+ grid-template-columns:240px minmax(0,1fr) !important;
+}
+.a1,.a2,.a3{
+ transform:none !important;
+ padding-left:4em !important;
+ box-sizing:border-box !important;
+}
+@media(max-width:600px){
+ .qa-grid{
+   grid-template-columns:185px minmax(0,1fr) !important;
+ }
+ .a1,.a2,.a3{
+   padding-left:4em !important;
+ }
+}
+
+
+/* v41: 名称入力後の3段目特徴 */
+.q5{grid-row:5 !important;}
+.a5{
+ grid-row:5 !important;
+ padding-left:4em !important;
+ align-self:start !important;
+ flex-wrap:wrap !important;
+ padding-bottom:18px !important;
+}
+#a5Cell .adj-answer-line{
+ display:inline-flex;
+ align-items:center;
+ gap:3px;
+}
+#a5Cell .adj-answer-line:nth-child(2){
+ flex-basis:100%;
+ width:100%;
+ margin-top:18px;
+}
+.name-adj-table{margin-top:10px;}
+
+
+/* v43: 名称入力前は最後の文（～は を含む）を完全に隠す */
+#a5Cell{
+ display:none;
+}
+
+
+/* v44: 名称未入力なら、その下は何も表示しない */
+#nameAdjTable,
+#a5Cell,
+#q5Cell{
+ display:none;
+}
+
+
+/* v45: hidden は必ず勝つ。名称未入力時「～は」行をDOMごと非表示 */
+[hidden]{
+ display:none !important;
+}
+
+
+/* v46: 建物2種だけ名称入力を次の行へ */
+.a3{
+ flex-wrap:wrap !important;
+}
+.name-inline.name-next-line{
+ flex-basis:100% !important;
+ width:100% !important;
+ margin-left:0 !important;
+ margin-top:7px !important;
+}
+
+
+/* v47: 2・3行目の出身地名表示を完全統一 */
+.origin-answer-text{
+ background:transparent !important;
+ border:none !important;
+ box-shadow:none !important;
+ padding:0 !important;
+ margin:0 !important;
+ border-radius:0 !important;
+ color:inherit !important;
+ font:inherit !important;
+ line-height:inherit !important;
+ white-space:nowrap !important;
+}
+
+
+/* v49: 3段目選択後の最後の回答行との間隔を詰める */
+.name-adj-table{
+ margin-bottom:4px !important;
+}
+.q5,.a5{
+ margin-top:0 !important;
+}
+.a5{
+ padding-top:0 !important;
+}
+#a5Cell .adj-answer-line{
+ margin-top:0 !important;
+}
+
+
+/* v50: 3段目→最後の回答行の間隔を最小化 */
+.name-adj-table{
+ margin-top:6px !important;
+ margin-bottom:0 !important;
+ padding-bottom:6px !important;
+}
+.qa-grid{
+ row-gap:5px !important;
+}
+.a5{
+ margin-top:-2px !important;
+ padding-top:0 !important;
+ padding-bottom:12px !important;
+}
+#a5Cell{
+ align-self:start !important;
+}
+#a5Cell .adj-answer-line{
+ margin-top:0 !important;
+}
+/* 名称入力後は「名称 は」まで見せる */
+#a5Cell[hidden]{
+ display:none !important;
+}
+
+
+/* v53: 最後の文は「です。そして、／ですが、」で接続 */
+#a5Cell .adj-answer-line:nth-child(2){
+ flex-basis:auto !important;
+ width:auto !important;
+ margin-top:0 !important;
+}
+
+
+/* v58: 3段目の使用不可ボタン */
+#nameAdjArea .choice.disabled-choice,
+#nameAdjArea .choice:disabled{
+ opacity:.32 !important;
+ cursor:not-allowed !important;
+ filter:grayscale(.25);
+}
+
+
+/* v59: 投稿文の訳が重ならないようにする */
+.post-row .posted-card{
+ display:inline-flex !important;
+ flex-direction:column !important;
+ align-items:center !important;
+ justify-content:center !important;
+ position:relative !important;
+ padding-bottom:0 !important;
+ margin-bottom:0 !important;
+ vertical-align:middle !important;
+}
+.post-row .posted-card .posted-cn{
+ position:static !important;
+ display:block !important;
+ transform:none !important;
+ left:auto !important;
+ right:auto !important;
+ top:auto !important;
+ bottom:auto !important;
+ white-space:nowrap !important;
+ line-height:1.05 !important;
+ margin-top:2px !important;
+}
+.post-row{
+ row-gap:5px !important;
+}
+.post-row .post-second-answer,
+.post-row .post-third-line{
+ align-items:center !important;
+}
+
+
+/* v60: 投稿文3行目の訳重なりを完全修正 */
+.post-row .post-third-line{
+ display:flex !important;
+ flex-wrap:nowrap !important;
+ align-items:flex-start !important;
+ min-height:46px !important;
+ padding-top:2px !important;
+ padding-bottom:2px !important;
+ margin-top:6px !important;
+ overflow:visible !important;
+}
+
+.post-row .post-third-line .posted-card{
+ position:relative !important;
+ display:inline-grid !important;
+ grid-template-rows:auto 13px !important;
+ align-items:start !important;
+ justify-items:center !important;
+ height:auto !important;
+ min-height:36px !important;
+ padding:3px 7px 2px !important;
+ margin:0 3px !important;
+ overflow:visible !important;
+}
+
+.post-row .post-third-line .posted-card .posted-cn{
+ position:static !important;
+ display:block !important;
+ grid-row:2 !important;
+ width:max-content !important;
+ max-width:none !important;
+ height:13px !important;
+ margin:1px 0 0 !important;
+ padding:0 !important;
+ transform:none !important;
+ line-height:12px !important;
+ white-space:nowrap !important;
+}
+
+.post-row .post-third-line > span:not(.posted-card){
+ padding-top:5px !important;
+}
+
+
+/* v62: 1段目・3段目ボタン群の右上注記 */
+.choice-note{
+ text-align:right;
+ font-size:12px;
+ color:#5f7f8d;
+ margin:0 5px 3px 0;
+ line-height:1.25;
+}
+
+
+/* v63: 投稿の「いいところ」ボタンは最終行と同じ高さ、♥×Nはその前の行の右上 */
+.post{
+ position:relative !important;
+}
+.post .me-too-wrap{
+ position:absolute !important;
+ right:6px !important;
+ bottom:6px !important;
+ top:auto !important;
+ left:auto !important;
+ margin:0 !important;
+ z-index:50 !important;
+}
+.post > .me-too-count{
+ position:absolute !important;
+ right:6px !important;
+ top:6px !important;
+ bottom:auto !important;
+ left:auto !important;
+ margin:0 !important;
+ transform:none !important;
+ z-index:60 !important;
+ white-space:nowrap !important;
+ pointer-events:none !important;
+}
+.post .posted-row{
+ padding-right:150px !important;
+}
+
+
+/* v64: いいところですね を最後行にぴったり揃える */
+.post .me-too-wrap{
+ bottom:11px !important;
+ display:flex !important;
+ align-items:center !important;
+}
+
+
+/* v65: 選択数の注記をボックス群の内側・左上へ */
+.choice-note{
+ text-align:left !important;
+ margin:0 0 5px 2px !important;
+ padding:0 !important;
+ align-self:flex-start !important;
+ width:100% !important;
+ box-sizing:border-box !important;
+}
+
+
+/* v66: 投稿には作成した全文を表示 */
+.posted-row{
+ display:flex !important;
+ flex-direction:column !important;
+ align-items:flex-start !important;
+ gap:5px !important;
+ padding-right:155px !important;
+}
+.post-origin-line,
+.post-answer-line,
+.post-third-line,
+.post-final-line{
+ display:flex !important;
+ align-items:flex-start !important;
+ flex-wrap:wrap !important;
+ gap:4px !important;
+ overflow:visible !important;
+}
+
+
+/* v67: 投稿文の行頭と行間を統一 */
+.posted-row{
+ display:grid !important;
+ grid-template-columns:max-content minmax(0,1fr) !important;
+ column-gap:7px !important;
+ row-gap:8px !important;
+ align-items:start !important;
+ padding-right:155px !important;
+}
+
+/* 名前は1行目だけ。本文1行目は名前の右から開始 */
+.posted-row > .posted-name{
+ grid-column:1 !important;
+ grid-row:1 !important;
+ align-self:start !important;
+ margin:0 !important;
+ padding:0 !important;
+ line-height:1.5 !important;
+}
+.posted-row > .post-origin-line{
+ grid-column:2 !important;
+ grid-row:1 !important;
+}
+
+/* 2行目以降は、1行目本文と同じ頭位置 */
+.posted-row > .post-answer-line,
+.posted-row > .post-third-line,
+.posted-row > .post-final-line{
+ grid-column:2 !important;
+ margin:0 !important;
+}
+
+/* 全行の高さ・間隔を同じ基準に */
+.post-origin-line,
+.post-answer-line,
+.post-third-line,
+.post-final-line{
+ display:flex !important;
+ align-items:flex-start !important;
+ flex-wrap:wrap !important;
+ gap:4px !important;
+ line-height:1.5 !important;
+ min-height:38px !important;
+ padding:0 !important;
+}
+
+/* 以前の3行目だけの余白指定を打ち消す */
+.post-row .post-third-line,
+.post-row .post-final-line{
+ margin-top:0 !important;
+ padding-top:0 !important;
+ padding-bottom:0 !important;
+}
+
+
+/* v70: 投稿1行目に2文を表示 */
+.post-origin-line .first-description{
+ display:inline-flex !important;
+ align-items:flex-start !important;
+ gap:4px !important;
+ margin-left:8px !important;
+}
+
+
+.name-inline{position:relative !important;}
+.dont-know-name{
+ position:absolute !important;right:-7px !important;top:-8px !important;z-index:8 !important;
+ border:1px solid #9bcbe0 !important;border-radius:9px !important;background:#fff !important;
+ color:#5b7a88 !important;font-size:10px !important;line-height:1 !important;
+ padding:3px 5px !important;cursor:pointer !important;white-space:nowrap !important;
+}
+#thingNameInput.unknown-name{text-align:center !important;font-weight:700 !important;}
+
+
+/* v74: 「不知道」を名称ボックス右上に密着 */
+.dont-know-name{
+ right:0 !important;
+ top:0 !important;
+ transform:translate(35%,-55%) !important;
+}
+
+
+/* v76: 不知道ボタンを入力ボックス右上に密着 */
+.name-inline{
+ position:relative !important;
+ display:inline-flex !important;
+ align-items:center !important;
+}
+.dont-know-name{
+ position:absolute !important;
+ right:2px !important;
+ top:0 !important;
+ transform:translateY(-78%) !important;
+ margin:0 !important;
+ z-index:20 !important;
+ font-size:10px !important;
+ line-height:1 !important;
+ padding:3px 5px !important;
+ border-radius:7px !important;
+}
+
+
+/* v77: 質問文を細字・2px小さく */
+.q-cell{
+ font-weight:400 !important;
+ font-size:calc(1em - 2px) !important;
+}
+
+
+/* v78: 3段目は名称未入力でも確実に表示 */
+#nameAdjTable.third-visible,
+#nameAdjTable[style*="display: block"]{
+ display:block !important;
+}
+#a5Cell[style*="display: flex"]{
+ display:flex !important;
+}
+
+/* v78: 「不知道」は入力ボックスそのものの右上角に密着 */
+.name-input-wrap{
+ position:relative !important;
+ display:inline-flex !important;
+ align-items:center !important;
+}
+.name-input-wrap .dont-know-name{
+ position:absolute !important;
+ right:0 !important;
+ top:0 !important;
+ transform:translate(0,-72%) !important;
+ margin:0 !important;
+ z-index:30 !important;
+}
+
+
+/* v79: 解答部の開始位置を大きく左へ寄せる */
+.qa-grid{
+ grid-template-columns:185px minmax(0,1fr) !important;
+}
+.a1,.a2,.a3,.a5{
+ padding-left:1em !important;
+}
+@media(max-width:600px){
+ .qa-grid{
+  grid-template-columns:145px minmax(0,1fr) !important;
+ }
+ .a1,.a2,.a3,.a5{
+  padding-left:.5em !important;
+ }
+}
+
+
+/* v80: 不知道ボタン +1px / 右へ5px、質問文 +1px */
+.name-input-wrap .dont-know-name{
+ font-size:11px !important;
+ right:-5px !important;
+}
+.q-cell{
+ font-size:calc(1em - 1px) !important;
+}
+
+
+/* v81: 作成中の各文の間隔を少し詰める（訳の高さは確保） */
+.qa-grid{
+ row-gap:3px !important;
+}
+.a2,.a3{
+ padding-bottom:16px !important;
+}
+.a2 .adj-answer-line:nth-child(2){
+ margin-top:16px !important;
+}
+.a5{
+ padding-bottom:10px !important;
+}
+
+
+/* v84: 投稿欄の高さを約1.5倍に */
+.post{
+ min-height:150px !important;
+}
+
+
+/* v86: 投稿欄の高さを上下ボタンで調整 */
+.feed{
+ height:300px !important;
+ min-height:150px !important;
+ overflow-y:auto !important;
+ box-sizing:border-box !important;
+}
+.feed-resizer{
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ gap:7px;
+ height:24px;
+ margin:2px 0 4px;
+ user-select:none;
+}
+.feed-resizer button{
+ width:30px;
+ height:22px;
+ padding:0;
+ border:1px solid var(--line);
+ border-radius:6px;
+ background:var(--button);
+ color:var(--dark);
+ font-size:14px;
+ line-height:18px;
+ font-weight:700;
+ cursor:pointer;
+}
+.feed-resizer button:active{
+ transform:translateY(1px);
+}
+
+
+/* v87: 1ボタン切替式 */
+.feed-resizer button{width:42px !important;}
+
+/* v91: 投稿左帯を本人/他人で色分け */
+.post{
+ border-left-style:solid !important;
+ border-left-width:5px !important;
+}
+.post.own-post{
+ border-left-color:#286b8a !important;
+}
+.post.other-post{
+ border-left-color:#d8eef8 !important;
+}
+
+
+/* v92: 質問・回答の重なり防止／名称は必ず次行／反応ボタンは本文の次行 */
+.qa-grid{
+ grid-template-columns:185px minmax(0,1fr) !important;
+ column-gap:12px !important;
+ row-gap:7px !important;
+ align-items:start !important;
+}
+.q-cell{
+ min-width:0 !important;
+ overflow:visible !important;
+}
+.a-cell{
+ min-width:0 !important;
+ position:relative !important;
+}
+.a3{
+ display:flex !important;
+ flex-wrap:wrap !important;
+ align-items:flex-start !important;
+}
+.a3 .name-inline,
+.a3 .name-next-line{
+ flex-basis:100% !important;
+ width:100% !important;
+ margin-top:17px !important;
+ margin-left:0 !important;
+ padding-left:0 !important;
+ display:flex !important;
+ align-items:center !important;
+}
+
+/* 投稿本文はハートボタンの幅を予約しない */
+.posted-row{
+ padding-right:8px !important;
+}
+.post{
+ padding-bottom:10px !important;
+}
+/* ハートボタンは絶対配置をやめ、最後の文の次の行へ */
+.post .me-too-wrap{
+ position:static !important;
+ right:auto !important;
+ bottom:auto !important;
+ transform:none !important;
+ display:flex !important;
+ justify-content:flex-end !important;
+ width:100% !important;
+ box-sizing:border-box !important;
+ margin:8px 0 0 !important;
+ padding:0 6px 0 0 !important;
+}
+.post > .me-too-count{
+ position:static !important;
+ float:right !important;
+ margin:5px 6px 0 0 !important;
+}
+@media(max-width:600px){
+ .qa-grid{
+  grid-template-columns:145px minmax(0,1fr) !important;
+  column-gap:9px !important;
+ }
+}
+
+
+/* v93: すべての回答を対応する質問の次の行に配置 */
+.qa-grid{
+ grid-template-columns:1fr !important;
+ column-gap:0 !important;
+ row-gap:4px !important;
+}
+.q1,.q2,.q3,.q5,
+.a1,.a2,.a3,.a5{
+ grid-column:1 !important;
+}
+.a1,.a2,.a3,.a5{
+ padding-left:2.2em !important;
+ margin-top:0 !important;
+}
+.q1{grid-row:1 !important;}
+.a1{grid-row:2 !important;}
+.q2{grid-row:3 !important;}
+.a2{grid-row:4 !important;}
+.q3{grid-row:5 !important;}
+.a3{grid-row:6 !important;}
+.q5{grid-row:7 !important;}
+.a5{grid-row:8 !important;}
+
+@media(max-width:600px){
+ .qa-grid{
+  grid-template-columns:1fr !important;
+  column-gap:0 !important;
+ }
+ .a1,.a2,.a3,.a5{
+  padding-left:1.5em !important;
+ }
+}
+
+
+/* v94: 投稿本文は右端まで使用。いいねボタンのための横幅予約を完全に解除 */
+.post{
+ display:block !important;
+}
+.posted-row{
+ width:100% !important;
+ max-width:none !important;
+ padding-right:0 !important;
+ margin-right:0 !important;
+ box-sizing:border-box !important;
+}
+.posted-row > .post-origin-line,
+.posted-row > .post-answer-line,
+.posted-row > .post-third-line,
+.posted-row > .post-final-line{
+ max-width:none !important;
+ width:auto !important;
+ padding-right:0 !important;
+ margin-right:0 !important;
+}
+.post .me-too-wrap{
+ position:static !important;
+ clear:both !important;
+ width:100% !important;
+ margin-top:8px !important;
+ padding:0 !important;
+ display:flex !important;
+ justify-content:flex-end !important;
+}
+
+
+
+/* v96: 投稿本文は常に右端までレイアウトし、反応ボタンは後から重ならない時だけ同じ行へ */
+.post{
+ position:relative !important;
+ display:block !important;
+}
+.posted-row{
+ display:grid !important;
+ width:100% !important;
+ max-width:none !important;
+ min-width:0 !important;
+ padding-right:0 !important;
+ margin-right:0 !important;
+ box-sizing:border-box !important;
+}
+.posted-row > .post-origin-line,
+.posted-row > .post-answer-line,
+.posted-row > .post-third-line,
+.posted-row > .post-final-line{
+ width:auto !important;
+ max-width:100% !important;
+ min-width:0 !important;
+ padding-right:0 !important;
+ margin-right:0 !important;
+ box-sizing:border-box !important;
+ flex-wrap:wrap !important;
+}
+.posted-place-plain,
+.post-origin-line > span:not(.posted-card),
+.post-answer-line > span:not(.posted-card),
+.post-third-line > span:not(.posted-card),
+.post-final-line > span:not(.posted-card){
+ overflow-wrap:anywhere;
+}
+
+/* ♥×N は常に1行目右端 */
+.post > .me-too-count{
+ position:absolute !important;
+ top:6px !important;
+ right:7px !important;
+ left:auto !important;
+ bottom:auto !important;
+ margin:0 !important;
+ float:none !important;
+ z-index:6 !important;
+ white-space:nowrap !important;
+ pointer-events:none !important;
+}
+
+/* 通常は最後の文の次の行。本文幅には一切影響しない */
+.post .me-too-wrap{
+ position:static !important;
+ display:flex !important;
+ width:100% !important;
+ justify-content:flex-end !important;
+ align-items:center !important;
+ clear:both !important;
+ margin:7px 0 0 !important;
+ padding:0 !important;
+ box-sizing:border-box !important;
+}
+
+/* 実測して余白がある時だけ、本文を再レイアウトせず同じ行の右端へ重ねる */
+.post.reaction-inline .me-too-wrap{
+ position:absolute !important;
+ right:7px !important;
+ top:var(--reaction-top, 0px) !important;
+ left:auto !important;
+ bottom:auto !important;
+ width:auto !important;
+ margin:0 !important;
+ padding:0 !important;
+ clear:none !important;
+ z-index:5 !important;
+}
+
+
+/* v97: 出身・名称入力欄の高さを揃えて少し低く／不知道を3px下へ */
+#shusshinInput,
+#thingNameInput{
+ height:30px !important;
+ min-height:30px !important;
+ padding:3px 8px !important;
+ line-height:20px !important;
+ box-sizing:border-box !important;
+ border-width:2px !important;
+ border-radius:8px !important;
+ font-size:16px !important;
+}
+.name-input-wrap .dont-know-name{
+ top:3px !important;
+}
+
+
+/* v98: 出身・名称入力欄の長さも統一 */
+#shusshinInput,
+#thingNameInput{
+ width:150px !important;
+ min-width:150px !important;
+ max-width:150px !important;
+ flex:0 0 150px !important;
+}
+
+/* 作成中のカードを、最後の段の正常なカードと同じ形に統一 */
+.a2 .posted-card,
+.a3 .posted-card,
+.a5 .posted-card,
+.a2 .shusshin-adj-card,
+.a3 .thing-card{
+ position:relative !important;
+ display:inline-flex !important;
+ align-items:center !important;
+ justify-content:center !important;
+ height:auto !important;
+ min-height:0 !important;
+ padding:5px 7px !important;
+ margin:0 !important;
+ box-sizing:border-box !important;
+ line-height:1 !important;
+ border-radius:7px !important;
+ overflow:visible !important;
+ vertical-align:middle !important;
+}
+.a2 .posted-cn,
+.a3 .posted-cn,
+.a5 .posted-cn{
+ position:absolute !important;
+ left:0 !important;
+ right:0 !important;
+ top:calc(100% + 2px) !important;
+ bottom:auto !important;
+ transform:none !important;
+ text-align:center !important;
+ line-height:1 !important;
+ white-space:nowrap !important;
+}
+
+/* 不知道は前版からさらに崩さず、指定どおり3px下げた位置 */
+.name-input-wrap .dont-know-name{
+ top:3px !important;
+}
+
+
+/* v99: 出身・名称入力欄を短く */
+#shusshinInput,
+#thingNameInput{
+ width:125px !important;
+ min-width:125px !important;
+ max-width:125px !important;
+ flex:0 0 125px !important;
+}
+
+
+/* v101: 回答を少し右へ／未表示の質問・回答ぶんの空き行を作らない */
+.q1,.a1,.q2,.a2,.q3,.a3,.q5,.a5{
+ grid-row:auto !important;
+}
+.a1,.a2,.a3,.a5{
+ padding-left:3.5em !important;
+}
+@media(max-width:600px){
+ .a1,.a2,.a3,.a5{
+  padding-left:2.5em !important;
+ }
+}
+
+
+/* v102: 投稿本文の折返し幅は常に投稿欄いっぱい。いいねボタンは本文幅に一切影響させない */
+.post .posted-row,
+.post.me-too-inline .posted-row,
+.post:not(.me-too-inline) .posted-row{
+ display:grid !important;
+ width:100% !important;
+ max-width:100% !important;
+ min-width:0 !important;
+ padding-right:0 !important;
+ margin-right:0 !important;
+ box-sizing:border-box !important;
+ vertical-align:initial !important;
+}
+.posted-row > .post-origin-line,
+.posted-row > .post-answer-line,
+.posted-row > .post-third-line,
+.posted-row > .post-final-line{
+ width:auto !important;
+ max-width:100% !important;
+ min-width:0 !important;
+ padding-right:0 !important;
+ margin-right:0 !important;
+ box-sizing:border-box !important;
+}
+
+/* ボタンは本文レイアウトから独立。JSで「最後の実表示行に空きがある」ときだけ重ねる */
+.post{
+ position:relative !important;
+}
+.post .me-too-wrap,
+.post.me-too-inline .me-too-wrap,
+.post:not(.me-too-inline) .me-too-wrap{
+ position:static !important;
+ display:flex !important;
+ width:100% !important;
+ justify-content:flex-end !important;
+ clear:both !important;
+ margin:7px 0 0 !important;
+ padding:0 !important;
+ box-sizing:border-box !important;
+}
+.post.reaction-on-last-line .me-too-wrap{
+ position:absolute !important;
+ right:7px !important;
+ bottom:7px !important;
+ width:auto !important;
+ margin:0 !important;
+ z-index:4 !important;
+}
+
+
+/* v105: 投稿文を1文目・2文目・3文目として確実に表示 */
+.posted-row{
+ display:grid !important;
+ grid-template-columns:max-content minmax(0,1fr) !important;
+ grid-template-rows:auto auto auto !important;
+ column-gap:7px !important;
+ row-gap:7px !important;
+ width:100% !important;
+ max-width:100% !important;
+ padding-right:0 !important;
+ box-sizing:border-box !important;
+}
+.posted-row > .posted-name{
+ grid-column:1 !important;
+ grid-row:1 !important;
+}
+.posted-row > .post-origin-line{
+ grid-column:2 !important;
+ grid-row:1 !important;
+ display:flex !important;
+ flex-wrap:wrap !important;
+ min-width:0 !important;
+ max-width:100% !important;
+}
+.posted-row > .post-third-line:not(.post-final-line){
+ grid-column:2 !important;
+ grid-row:2 !important;
+ display:flex !important;
+ flex-wrap:wrap !important;
+ min-width:0 !important;
+ max-width:100% !important;
+}
+.posted-row > .post-final-line{
+ grid-column:2 !important;
+ grid-row:3 !important;
+ display:flex !important;
+ flex-wrap:wrap !important;
+ min-width:0 !important;
+ max-width:100% !important;
+}
+/* いいねボタンは投稿文の幅を縮めない */
+.post .posted-row,
+.post.me-too-inline .posted-row,
+.post:not(.me-too-inline) .posted-row{
+ width:100% !important;
+ max-width:100% !important;
+}
+
+
+
+
+/* v107: 未選択の回答文を先に出さない */
+.a2:not([style*="display: flex"]),
+.a3:not([style*="display: flex"]){
+ display:none !important;
+}
+
+
+/* v108: 質問・回答 → その質問に対応するボタン群 */
+.qa-stage-block{
+ width:100%;
+ box-sizing:border-box;
+ margin-top:8px;
+ margin-bottom:5px;
+}
+.qa-stage-block .q-cell{
+ display:block;
+ width:100%;
+ box-sizing:border-box;
+ margin-bottom:4px;
+}
+.qa-stage-block .a-cell{
+ width:100%;
+ box-sizing:border-box;
+}
+.qa-stage-block .a2,
+.qa-stage-block .a3,
+.qa-stage-block .a5{
+ padding-left:3.5em !important;
+}
+@media(max-width:600px){
+ .qa-stage-block .a2,
+ .qa-stage-block .a3,
+ .qa-stage-block .a5{
+  padding-left:2.5em !important;
+ }
+}
+
+
+/* v109: 地名未入力では「〜は どんな ところですか。」を表示しない */
+.q2{display:none;}
+
+
+/* v110: ♥×N は「いいところですね。」ボタンの一つ前の行の右端 */
+.post > .me-too-count{
+ position:static !important;
+ display:block !important;
+ width:100% !important;
+ box-sizing:border-box !important;
+ text-align:right !important;
+ margin:4px 0 2px !important;
+ padding:0 7px 0 0 !important;
+ float:none !important;
+}
+.post .me-too-wrap,
+.post.me-too-inline .me-too-wrap,
+.post:not(.me-too-inline) .me-too-wrap,
+.post.reaction-on-last-line .me-too-wrap{
+ position:static !important;
+ display:flex !important;
+ width:100% !important;
+ justify-content:flex-end !important;
+ clear:both !important;
+ margin:0 !important;
+ padding:0 !important;
+ box-sizing:border-box !important;
+}
+
+
+/* v114: 投稿文が自然折返しした行も、通常の投稿行と同じ縦間隔にする */
+.posted-row > .post-origin-line,
+.posted-row > .post-answer-line,
+.posted-row > .post-third-line,
+.posted-row > .post-final-line{
+ line-height:1.65 !important;
+}
+
+/* flex内で折り返された場合も同じ行高を維持 */
+.posted-row > .post-origin-line,
+.posted-row > .post-answer-line,
+.posted-row > .post-third-line,
+.posted-row > .post-final-line{
+ align-items:baseline !important;
+ align-content:flex-start !important;
+ row-gap:0 !important;
+}
+
+
+/* v115: 投稿文の「文間」と「自然折返し」の行間を完全に統一 */
+.posted-row{
+ row-gap:0 !important;
+}
+.posted-row > .post-origin-line,
+.posted-row > .post-answer-line,
+.posted-row > .post-third-line,
+.posted-row > .post-final-line{
+ line-height:1.75 !important;
+ min-height:1.75em !important;
+ margin:0 !important;
+ padding-top:0 !important;
+ padding-bottom:0 !important;
+}
+
+/* 各文の次行も、自然折返し1行分と同じ距離だけ下げる */
+.posted-row > .post-answer-line,
+.posted-row > .post-third-line,
+.posted-row > .post-final-line{
+ margin-top:0 !important;
+}
+
+/* flex折返しでも各flex lineの高さを潰さない */
+.posted-row > .post-origin-line,
+.posted-row > .post-answer-line,
+.posted-row > .post-third-line,
+.posted-row > .post-final-line{
+ align-items:baseline !important;
+ align-content:normal !important;
+}
+
+
+/* v116: 投稿カード内の中国語訳ぶんの高さを確保して、次の行と重ならないようにする */
+.posted-row > .post-origin-line,
+.posted-row > .post-answer-line,
+.posted-row > .post-third-line,
+.posted-row > .post-final-line{
+ overflow:visible !important;
+}
+
+/* 訳はカードの下に出るため、そのぶん各投稿行の下側に余白を確保 */
+.posted-row > .post-origin-line:has(.posted-cn),
+.posted-row > .post-answer-line:has(.posted-cn),
+.posted-row > .post-third-line:has(.posted-cn),
+.posted-row > .post-final-line:has(.posted-cn){
+ padding-bottom:15px !important;
+}
+
+/* カード内訳の位置は維持しつつ、本文との距離を一定にする */
+.posted-row .posted-cn{
+ top:calc(100% + 2px) !important;
+ line-height:1.1 !important;
+}
+
+
+/* v117: 投稿内の訳を absolute で浮かせず、カード自身の高さに含める。
+   これで自然折返ししても訳と次の表示行が絶対に重ならない。 */
+.post .posted-card{
+ position:relative !important;
+ display:inline-grid !important;
+ grid-template-rows:auto auto !important;
+ align-items:center !important;
+ justify-items:center !important;
+ height:auto !important;
+ min-height:0 !important;
+ padding:5px 7px 3px !important;
+ margin:0 !important;
+ line-height:1.15 !important;
+ vertical-align:top !important;
+ overflow:visible !important;
+ box-sizing:border-box !important;
+}
+.post .posted-card > span:first-child{
+ grid-row:1 !important;
+ line-height:1.2 !important;
+ white-space:nowrap !important;
+}
+.post .posted-card > .posted-cn{
+ position:static !important;
+ grid-row:2 !important;
+ display:block !important;
+ left:auto !important;
+ right:auto !important;
+ top:auto !important;
+ bottom:auto !important;
+ transform:none !important;
+ margin-top:3px !important;
+ line-height:1.1 !important;
+ white-space:nowrap !important;
+ text-align:center !important;
+}
+
+/* v116で設けた仮の下余白は不要。カードの実高さでレイアウトする */
+.posted-row > .post-origin-line:has(.posted-cn),
+.posted-row > .post-answer-line:has(.posted-cn),
+.posted-row > .post-third-line:has(.posted-cn),
+.posted-row > .post-final-line:has(.posted-cn){
+ padding-bottom:0 !important;
+}
+
+/* 折返し行はカードの実高さを基準に並び、行同士に一定の余白を持たせる */
+.posted-row > .post-origin-line,
+.posted-row > .post-answer-line,
+.posted-row > .post-third-line,
+.posted-row > .post-final-line{
+ line-height:1.75 !important;
+ align-items:flex-start !important;
+ align-content:flex-start !important;
+ row-gap:7px !important;
+}
+
+
+/* v118: カード背景は日本語部分だけ。中国語訳はカードの外側に置く */
+.post .posted-card{
+ position:relative !important;
+ display:inline-flex !important;
+ align-items:center !important;
+ justify-content:center !important;
+ height:auto !important;
+ min-height:0 !important;
+ padding:5px 7px !important;
+ margin:0 0 18px 0 !important;
+ line-height:1.15 !important;
+ vertical-align:top !important;
+ overflow:visible !important;
+ box-sizing:border-box !important;
+}
+.post .posted-card > span:first-child{
+ display:inline !important;
+ line-height:1.2 !important;
+ white-space:nowrap !important;
+}
+.post .posted-card > .posted-cn{
+ position:absolute !important;
+ display:block !important;
+ left:50% !important;
+ right:auto !important;
+ top:calc(100% + 3px) !important;
+ bottom:auto !important;
+ transform:translateX(-50%) !important;
+ margin:0 !important;
+ padding:0 !important;
+ background:transparent !important;
+ border:0 !important;
+ box-shadow:none !important;
+ line-height:1.1 !important;
+ white-space:nowrap !important;
+ text-align:center !important;
+}
+
+/* カード下の18pxを各折返し行の実占有高として扱う */
+.posted-row > .post-origin-line,
+.posted-row > .post-answer-line,
+.posted-row > .post-third-line,
+.posted-row > .post-final-line{
+ min-height:0 !important;
+ padding-bottom:0 !important;
+ line-height:1.75 !important;
+ align-items:flex-start !important;
+ align-content:flex-start !important;
+ row-gap:7px !important;
+}
+
+
+/* v120: 投稿カード下余白を最小化 */
+.post{
+ min-height:0 !important;
+ padding-bottom:7px !important;
+}
+.post > .me-too-wrap{
+ margin-bottom:0 !important;
+}
+
+/* ♥×N は常に「いいねボタンの直前の1行」の右端 */
+.post > .me-too-count,
+.post.reaction-fit-last-line > .me-too-count{
+ position:static !important;
+ display:block !important;
+ width:100% !important;
+ box-sizing:border-box !important;
+ text-align:right !important;
+ margin:3px 0 2px !important;
+ padding:0 7px 0 0 !important;
+ line-height:1.15 !important;
+ white-space:nowrap !important;
+ inset:auto !important;
+ transform:none !important;
+}
+
+
+/* v121 */
+.post > .me-too-count,
+.post.reaction-fit-last-line > .me-too-count{
+ position:static !important; display:block !important; width:100% !important;
+ height:16px !important; min-height:16px !important; box-sizing:border-box !important;
+ text-align:right !important; margin:2px 0 2px !important; padding:0 7px 0 0 !important;
+ line-height:16px !important; white-space:nowrap !important;
+ inset:auto !important; transform:none !important;
+}
+.post > .me-too-wrap,.post.reaction-fit-last-line > .me-too-wrap{transition:none !important;}
+
+
+/* v122: いいねで投稿DOMを再生成しない。♥はボタンより必ず上 */
+.post > .me-too-count{
+ position:static !important;
+ display:block !important;
+ width:100% !important;
+ height:16px !important;
+ min-height:16px !important;
+ text-align:right !important;
+ line-height:16px !important;
+ margin:2px 0 2px !important;
+ padding:0 7px 0 0 !important;
+ box-sizing:border-box !important;
+}
+.post.reaction-fit-last-line > .me-too-count{
+ position:absolute !important;
+ width:auto !important;
+ height:16px !important;
+ min-height:16px !important;
+ right:7px !important;
+ top:calc(var(--reaction-btn-top) - 18px) !important;
+ bottom:auto !important;
+ left:auto !important;
+ margin:0 !important;
+ padding:0 !important;
+ line-height:16px !important;
+ z-index:7 !important;
+}
+
+
+/* v123 FINAL reaction layout
+   ♥×N = 必ずボタンの一行上。反応UIは通常フロー固定で、いいね時に位置を再計算しない。 */
+.post,
+.post.reaction-fit-last-line{
+ position:relative !important;
+ min-height:0 !important;
+ padding-bottom:6px !important;
+}
+.post > .me-too-count,
+.post.reaction-fit-last-line > .me-too-count{
+ position:static !important;
+ display:block !important;
+ width:100% !important;
+ height:16px !important;
+ min-height:16px !important;
+ box-sizing:border-box !important;
+ text-align:right !important;
+ line-height:16px !important;
+ margin:2px 0 1px !important;
+ padding:0 7px 0 0 !important;
+ inset:auto !important;
+ transform:none !important;
+ z-index:auto !important;
+ white-space:nowrap !important;
+}
+.post > .me-too-wrap,
+.post.reaction-fit-last-line > .me-too-wrap,
+.post.metoo-inline > .me-too-wrap,
+.post.metoo-row2 > .me-too-wrap,
+.post.metoo-row3 > .me-too-wrap,
+.post.reaction-inline > .me-too-wrap,
+.post.reaction-on-last-line > .me-too-wrap{
+ position:static !important;
+ display:flex !important;
+ width:100% !important;
+ max-width:100% !important;
+ justify-content:flex-end !important;
+ align-items:center !important;
+ box-sizing:border-box !important;
+ margin:0 !important;
+ padding:0 !important;
+ inset:auto !important;
+ transform:none !important;
+ z-index:auto !important;
+}
+
+/* いいね状態変更で寸法・位置・アニメーションを一切変えない */
+.post .me-too-btn,
+.post .me-too-count,
+.post .me-too-wrap{
+ transition:none !important;
+ animation:none !important;
+}
+
+
+/* v124: 反応エリアを本文の直下まで詰める */
+.post > .me-too-count,
+.post.reaction-fit-last-line > .me-too-count{
+ margin-top:-7px !important;
+ margin-bottom:0 !important;
+ height:15px !important;
+ min-height:15px !important;
+ line-height:15px !important;
+}
+.post > .me-too-wrap,
+.post.reaction-fit-last-line > .me-too-wrap,
+.post.metoo-inline > .me-too-wrap,
+.post.metoo-row2 > .me-too-wrap,
+.post.metoo-row3 > .me-too-wrap,
+.post.reaction-inline > .me-too-wrap,
+.post.reaction-on-last-line > .me-too-wrap{
+ margin-top:-1px !important;
+ margin-bottom:0 !important;
+}
+.post{
+ padding-bottom:4px !important;
+}
+
+
+/* v125: 最後の本文行に余裕がある時だけ、いいねボタンをその行の右端へ */
+.post.like-fits-last-line > .me-too-wrap{
+ position:absolute !important;
+ right:7px !important;
+ top:var(--like-top) !important;
+ width:auto !important;
+ max-width:none !important;
+ margin:0 !important;
+ padding:0 !important;
+ z-index:6 !important;
+}
+
+/* ♥×N はボタンの一行上・右端 */
+.post.like-fits-last-line > .me-too-count{
+ position:absolute !important;
+ right:7px !important;
+ top:calc(var(--like-top) - 17px) !important;
+ width:auto !important;
+ height:15px !important;
+ min-height:15px !important;
+ line-height:15px !important;
+ margin:0 !important;
+ padding:0 !important;
+ z-index:7 !important;
+}
+
+
+/* v126: いいね前後でボタンの寸法を一切変えない */
+.me-too-btn,
+.me-too-btn[aria-pressed="true"],
+.me-too-btn[aria-pressed="false"]{
+ box-sizing:border-box !important;
+ transform:none !important;
+ transition:none !important;
+ animation:none !important;
+}
+
+
+/* v127: いいね前後で投稿・反応UIの寸法を完全固定 */
+.me-too-btn,
+.me-too-btn:disabled,
+.me-too-btn[aria-pressed="true"],
+.me-too-btn[aria-pressed="false"]{
+ width:auto !important;
+ min-width:0 !important;
+ height:auto !important;
+ box-sizing:border-box !important;
+ transform:none !important;
+ transition:none !important;
+ animation:none !important;
+}
+
+
+/* v128: 町の特徴は最大2個 */
+#shusshinAdjPreview .adj-answer-line + .adj-answer-line,
+.first-description .town-post-sentence + .town-post-sentence{
+ margin-left:.45em !important;
+}
+
+
+/* v130: 「どんなところ」の答えは、入る限り一行。必要な時だけ自然に折り返す */
+#stage2QA .a2,
+.qa-stage-block .a2{
+ display:flex;
+ flex-wrap:wrap !important;
+ align-items:flex-start !important;
+ column-gap:.35em !important;
+ row-gap:6px !important;
+}
+#stage2QA .a2 #shusshinAdjPreview,
+.qa-stage-block .a2 #shusshinAdjPreview{
+ display:flex !important;
+ flex:1 1 auto !important;
+ min-width:0 !important;
+ flex-wrap:wrap !important;
+ align-items:flex-start !important;
+ column-gap:.35em !important;
+ row-gap:6px !important;
+}
+#shusshinAdjPreview .adj-answer-line{
+ display:inline-flex !important;
+ flex:0 0 auto !important;
+ align-items:flex-start !important;
+ white-space:nowrap !important;
+ margin-left:0 !important;
+}
+#shusshinAdjPreview .adj-answer-line + .adj-answer-line{
+ margin-left:0 !important;
+}
+.adj-choice-note{
+ margin-top:4px !important;
+}
+
+
+/* v131: 一段目の案内はボタン群の直前 */
+#adjChoiceNote{
+ margin:4px 0 5px 0 !important;
+ text-align:left !important;
+}
+
+/* 「どんなところ」の答え：
+   1文目は通常通り。2文目は文単位で、残り幅に入れば同じ行、
+   入らなければ丸ごと次の行へ。 */
+#stage2QA .a2,
+.qa-stage-block .a2{
+ display:flex !important;
+ flex-wrap:wrap !important;
+ align-items:flex-start !important;
+ column-gap:.35em !important;
+ row-gap:6px !important;
+}
+#stage2QA .a2 #shusshinAdjPreview,
+.qa-stage-block .a2 #shusshinAdjPreview{
+ display:contents !important;
+}
+#stage2QA .a2 #shusshinAdjPreview .adj-answer-line,
+.qa-stage-block .a2 #shusshinAdjPreview .adj-answer-line{
+ display:inline-flex !important;
+ flex:0 0 auto !important;
+ width:auto !important;
+ max-width:100% !important;
+ white-space:nowrap !important;
+ align-items:flex-start !important;
+ margin:0 !important;
+}
+
+
+/* v132: 一段目の説明はボタン群の中で1行を占有 */
+#adjTable #adjChoiceNote{
+ flex:0 0 100% !important;
+ width:100% !important;
+ box-sizing:border-box !important;
+ margin:0 0 5px 0 !important;
+ padding:0 !important;
+ text-align:left !important;
+}
+
+/* v132: 「どんなところ」の回答。
+   出身地＋は＋第1文は普通に流す。
+   第2文だけを1つの塊として扱い、残り幅に入れば同じ行、
+   入らなければ第2文全体を次行へ送る。 */
+#stage2QA .a2,
+.qa-stage-block .a2{
+ display:flex !important;
+ flex-wrap:wrap !important;
+ align-items:flex-start !important;
+ column-gap:.35em !important;
+ row-gap:6px !important;
+}
+#stage2QA .a2 #shusshinAdjPreview,
+.qa-stage-block .a2 #shusshinAdjPreview{
+ display:contents !important;
+}
+#shusshinAdjPreview .adj-answer-line{
+ display:inline-flex !important;
+ flex:0 0 auto !important;
+ width:max-content !important;
+ max-width:100% !important;
+ white-space:nowrap !important;
+ align-items:flex-start !important;
+ margin:0 !important;
+}
+
+/* 投稿側も各特徴文を文単位で折り返す */
+.post .first-description{
+ display:contents !important;
+}
+.post .town-post-sentence{
+ display:inline-flex !important;
+ flex:0 0 auto !important;
+ width:max-content !important;
+ max-width:100% !important;
+ white-space:nowrap !important;
+ align-items:flex-start !important;
+ margin:0 !important;
+}
+
+
+/* v133: 一段目説明は一度だけ表示。再描画で増殖させない */
+#adjTable > #adjChoiceNote{
+ display:block !important;
+ width:100% !important;
+ flex:0 0 100% !important;
+ margin:0 0 5px 0 !important;
+}
+
+/* v133: 投稿の「ですが、」前後を通常の文章間隔にする */
+.post .first-description .town-post-sentence + .town-post-sentence,
+.first-description .town-post-sentence + .town-post-sentence{
+ margin-left:0 !important;
+}
+.post .first-description,
+.post .town-post-sentence{
+ column-gap:0 !important;
+ gap:0 !important;
+}
+.post .town-post-sentence > span{
+ margin-left:0 !important;
+ margin-right:0 !important;
+}
+
+
+/* v134: 投稿の自然折返し時の縦余白を詰める。
+   中国語訳が重ならない最低限だけ確保する。 */
+.post .posted-card{
+ margin-bottom:14px !important;
+}
+.posted-row > .post-origin-line,
+.posted-row > .post-answer-line,
+.posted-row > .post-third-line,
+.posted-row > .post-final-line{
+ row-gap:0 !important;
+ line-height:1.45 !important;
+}
+
+/* 投稿内の「な」カードを通常カードと同じ日本語カード寸法・位置に揃える */
+.post .na-card{
+ display:inline-flex !important;
+ align-items:center !important;
+ justify-content:center !important;
+ align-self:flex-start !important;
+ box-sizing:border-box !important;
+ min-height:0 !important;
+ padding:5px 7px !important;
+ margin:0 0 14px 0 !important;
+ border-radius:7px !important;
+ background:#fff1f5 !important;
+ color:#7a5964 !important;
+ line-height:1.15 !important;
+ vertical-align:top !important;
+ flex:0 0 auto !important;
+}
+
+/* 「そして、」と次の形容詞は絶対に分離しない。
+   形容詞の後ろでは通常どおり折返し可能。 */
+.post .connector-with-adj{
+ display:inline-flex !important;
+ flex:0 0 auto !important;
+ align-items:flex-start !important;
+ white-space:nowrap !important;
+ gap:0 !important;
+ margin:0 !important;
+ padding:0 !important;
+}
+
+
+/* v135: 投稿1・2行目を同じ行間・同じ基準線に統一 */
+.posted-row > .post-origin-line,
+.posted-row > .post-answer-line{
+ line-height:1.45 !important;
+ row-gap:0 !important;
+ margin-top:0 !important;
+ margin-bottom:0 !important;
+ padding-top:0 !important;
+ padding-bottom:0 !important;
+ align-items:flex-start !important;
+ align-content:flex-start !important;
+}
+
+/* カードを文字の基準線から下げない */
+.post .posted-card,
+.post .na-card{
+ vertical-align:top !important;
+ align-self:flex-start !important;
+ position:relative !important;
+ top:0 !important;
+ transform:none !important;
+}
+
+/* 日本語文字もカード内で中央に固定 */
+.post .posted-card > span:first-child,
+.post .na-card{
+ line-height:1.15 !important;
+}
+
+/* 中国語訳だけカードの下へ。カード本体の位置には影響させない */
+.post .posted-card > .posted-cn{
+ top:calc(100% + 2px) !important;
+ transform:translateX(-50%) !important;
+ line-height:1.05 !important;
+}
+
+
+/* v136: 投稿本文の折返し・改行を同一の行ボックス規則に統一 */
+.posted-row{
+ --post-line-h:1.55em;
+ --post-card-bottom:15px;
+}
+
+.posted-row > .post-origin-line,
+.posted-row > .post-answer-line,
+.posted-row > .post-third-line,
+.posted-row > .post-final-line{
+ display:flex !important;
+ flex-wrap:wrap !important;
+ align-items:flex-start !important;
+ align-content:flex-start !important;
+ column-gap:0 !important;
+ row-gap:0 !important;
+ line-height:var(--post-line-h) !important;
+ margin:0 !important;
+ padding:0 !important;
+ min-height:0 !important;
+}
+
+/* 折返された各文も親と同じ行高。独自の縦位置を持たせない */
+.post .first-description{
+ display:contents !important;
+}
+.post .town-post-sentence,
+.post .connector-with-adj{
+ display:inline-flex !important;
+ flex:0 0 auto !important;
+ flex-wrap:nowrap !important;
+ align-items:flex-start !important;
+ align-self:flex-start !important;
+ line-height:var(--post-line-h) !important;
+ margin:0 !important;
+ padding:0 !important;
+ gap:0 !important;
+ white-space:nowrap !important;
+}
+
+/* カード本体の上端を普通の文字と完全に同じ位置に固定 */
+.post .posted-card,
+.post .na-card{
+ display:inline-flex !important;
+ flex:0 0 auto !important;
+ align-items:center !important;
+ justify-content:center !important;
+ align-self:flex-start !important;
+ position:relative !important;
+ top:0 !important;
+ bottom:auto !important;
+ transform:none !important;
+ vertical-align:top !important;
+ box-sizing:border-box !important;
+ min-height:0 !important;
+ height:auto !important;
+ padding:5px 7px !important;
+ margin:0 0 var(--post-card-bottom) 0 !important;
+ line-height:1.15 !important;
+}
+
+/* 「な」は訳なしカードなので、訳用の余白を持たせない */
+.post .na-card{
+ margin-bottom:0 !important;
+}
+
+/* 訳は絶対配置。本文の行高・カード位置を押し下げない */
+.post .posted-card > .posted-cn{
+ position:absolute !important;
+ left:50% !important;
+ top:calc(100% + 2px) !important;
+ bottom:auto !important;
+ transform:translateX(-50%) !important;
+ margin:0 !important;
+ padding:0 !important;
+ line-height:1.05 !important;
+ white-space:nowrap !important;
+}
+
+/* 1文目と2文目の間にも独自の縦余白を作らない */
+.post .town-post-sentence + .town-post-sentence,
+.posted-row > .post-origin-line + .post-answer-line{
+ margin-top:0 !important;
+}
+
+
+/* v138: 全体間隔はv136へ戻し、折返しだけ最小修正 */
+.posted-row{
+ --post-line-h:1.55em;
+}
+
+/* 行全体に追加余白を入れない */
+.posted-row > .post-origin-line,
+.posted-row > .post-answer-line,
+.posted-row > .post-third-line,
+.posted-row > .post-final-line{
+ line-height:var(--post-line-h) !important;
+ row-gap:0 !important;
+ margin:0 !important;
+ padding:0 !important;
+}
+
+/* カードの日本語部分は文字と同じ上端 */
+.post .posted-card,
+.post .na-card{
+ top:0 !important;
+ transform:none !important;
+ vertical-align:top !important;
+ align-self:flex-start !important;
+}
+
+/* 「な」だけ下余白を持たせない */
+.post .na-card{
+ margin:0 !important;
+}
+
+/* 通常カードの訳用余白は元の範囲だけ確保 */
+.post .posted-card{
+ margin:0 0 14px 0 !important;
+}
+
+/* 折返しの文ブロック自体には余計な間隔を足さない */
+.post .town-post-sentence,
+.post .connector-with-adj{
+ margin:0 !important;
+ padding:0 !important;
+ gap:0 !important;
+ line-height:var(--post-line-h) !important;
+}
+
+
+/* v139
+   町の特徴の2文目：
+   1行目の残りに入るかではなく、「2行目なら1行で収まる」場合は
+   2文目を最初から次行へ送る。 */
+#shusshinAdjPreview .adj-answer-line:nth-child(2){
+ flex-basis:auto !important;
+}
+
+/* 投稿の町特徴も同じルール */
+.post .first-description .town-post-sentence:nth-child(2){
+ flex-basis:auto !important;
+}
+
+/* 投稿1行目は、中国語訳のための上側の呼吸を少し戻す。
+   カードだけが下がって見えないよう本文全体を同じ位置から開始。 */
+.posted-row > .post-origin-line{
+ padding-top:5px !important;
+}
+.posted-row > .post-origin-line .posted-card,
+.posted-row > .post-origin-line .na-card{
+ top:0 !important;
+ align-self:flex-start !important;
+}
+
+
+/* v140: 投稿文「出身は」の間を詰める */
+.post .post-origin-line > span:first-child,
+.post .post-origin-line > span:nth-child(2){
+ margin-right:0 !important;
+ margin-left:0 !important;
+}
+.post .post-origin-line{
+ column-gap:0 !important;
+}
+
+
+/* v141: 「出身は」は文字列自体もCSS上も完全に連続 */
+.post .shusshin-wa{
+ white-space:nowrap !important;
+ margin:0 !important;
+ padding:5px 0 0 0 !important;
+ letter-spacing:0 !important;
+}
+
+/* 投稿1行目：カード箱の上端を行の上端へ。
+   普通の文字側をカード内文字と同じ高さまで下げる。 */
+.posted-row > .post-origin-line{
+ padding-top:5px !important;
+ align-items:flex-start !important;
+}
+.posted-row > .post-origin-line > span:not(.posted-card):not(.first-description),
+.post .town-post-sentence > span:not(.posted-card):not(.na-card){
+ padding-top:5px !important;
+ box-sizing:border-box !important;
+}
+.posted-row > .post-origin-line .posted-card,
+.posted-row > .post-origin-line .na-card{
+ top:0 !important;
+ margin-top:0 !important;
+ align-self:flex-start !important;
+}
+
+/* first-description内で普通文字に付いた余計な外側余白は消す */
+.post .first-description,
+.post .town-post-sentence{
+ margin-top:0 !important;
+ padding-top:0 !important;
+}
+
+
+/* v142: 第2文を2行目へ送った場合、その1行内で折り返さない */
+#shusshinAdjPreview .adj-answer-line:nth-child(2){
+ white-space:nowrap !important;
+}
+
+/* v141で1行目全体に足した5pxを撤回。
+   カードが少し上がって見える分だけ、カードを2px下げて文字と揃える。 */
+.posted-row > .post-origin-line{
+ padding-top:0 !important;
+}
+.posted-row > .post-origin-line > span:not(.posted-card):not(.first-description),
+.post .town-post-sentence > span:not(.posted-card):not(.na-card){
+ padding-top:0 !important;
+}
+.posted-row > .post-origin-line .posted-card,
+.posted-row > .post-origin-line .na-card{
+ top:2px !important;
+}
+
+
+/* v143: カード箱は動かさない。
+   カード内の日本語文字の基準線だけ、通常本文に合わせる。 */
+.posted-row > .post-origin-line .posted-card,
+.posted-row > .post-origin-line .na-card{
+ top:0 !important;
+ transform:none !important;
+ align-self:flex-start !important;
+}
+.posted-row > .post-origin-line .posted-card > span:first-child,
+.posted-row > .post-origin-line .na-card{
+ position:relative !important;
+ top:2px !important;
+}
+
+/* 「どんなところ」の2文目は2行目に送った時は必ず一行 */
+#shusshinAdjPreview .adj-answer-line:nth-child(2){
+ max-width:none !important;
+}
+
+
+/* v144: 「1つか2つ」は、ちいさい選択中だけ */
+#adjChoiceNote{display:none !important;}
+#adjTable.small-selected > #adjChoiceNote{display:block !important;}
+
+/* カード箱を上下に動かさない。カード内文字も余計にずらさない */
+.posted-row > .post-origin-line .posted-card,
+.posted-row > .post-origin-line .na-card{
+ top:0 !important;
+ transform:none !important;
+ align-self:flex-start !important;
+}
+.posted-row > .post-origin-line .posted-card > span:first-child,
+.posted-row > .post-origin-line .na-card{
+ position:static !important;
+ top:auto !important;
+}
+
+/* 2文目が単独一行で入る時は、必ず次行から */
+#shusshinAdjPreview .adj-answer-line.force-second-line{
+ flex-basis:100% !important;
+ width:max-content !important;
+ max-width:none !important;
+ white-space:nowrap !important;
+}
+
+
+/* v145: 投稿文のカードと通常文字を同じ上下位置に揃える */
+.posted-row > .post-origin-line,
+.posted-row > .post-answer-line,
+.posted-row > .post-third-line,
+.posted-row > .post-final-line,
+.post .town-post-sentence,
+.post .connector-with-adj{
+ align-items:center !important;
+}
+
+.post .posted-card,
+.post .na-card{
+ align-self:center !important;
+ top:0 !important;
+ bottom:auto !important;
+ transform:none !important;
+ vertical-align:middle !important;
+}
+
+/* カード内の日本語にも上下方向の個別補正をかけない */
+.post .posted-card > span:first-child,
+.post .na-card{
+ position:static !important;
+ top:auto !important;
+ bottom:auto !important;
+ transform:none !important;
+}
+
+/* 本文文字にも個別の上下paddingを残さない */
+.posted-row > .post-origin-line > span:not(.posted-card):not(.first-description),
+.post .town-post-sentence > span:not(.posted-card):not(.na-card){
+ padding-top:0 !important;
+ padding-bottom:0 !important;
+}
+
+
+/* v146: 中国語訳はカードの縦位置計算から完全に除外。
+   カード本体と本文文字だけで上下を揃える。 */
+.post .posted-card{
+ position:relative !important;
+ overflow:visible !important;
+ margin-bottom:14px !important;
+ align-self:flex-start !important;
+ vertical-align:top !important;
+ top:0 !important;
+ transform:none !important;
+}
+.post .posted-card > .posted-cn{
+ position:absolute !important;
+ left:50% !important;
+ top:100% !important;
+ margin-top:2px !important;
+ transform:translateX(-50%) !important;
+ height:auto !important;
+ line-height:1.05 !important;
+ pointer-events:none !important;
+}
+
+/* 訳を含まないカード本体の上端に、通常文字を合わせる */
+.posted-row > .post-origin-line,
+.posted-row > .post-answer-line,
+.posted-row > .post-third-line,
+.posted-row > .post-final-line,
+.post .town-post-sentence,
+.post .connector-with-adj{
+ align-items:flex-start !important;
+}
+.post .na-card{
+ align-self:flex-start !important;
+ top:0 !important;
+ transform:none !important;
+}
+
+
+/* v147: カード本体だけをほんの少し上へ。訳の位置計算には影響させない */
+.post .posted-card,
+.post .na-card{
+ transform:translateY(-1px) !important;
+}
+
+
+/* v148: カード枠ではなく、日本語本文のベースラインを素の文と一致させる。
+   訳は絶対配置のままなので基準には入らない。 */
+.post .posted-card{
+ transform:none !important;
+ align-self:flex-start !important;
+}
+.post .na-card{
+ transform:none !important;
+ align-self:flex-start !important;
+}
+
+/* カード内のメイン文字だけを素の本文のベースラインへ合わせる */
+.post .posted-card > span:first-child{
+ position:relative !important;
+ top:-2px !important;
+ line-height:1.2 !important;
+}
+
+/* 「な」も同じ文字基準 */
+.post .na-card{
+ line-height:1.2 !important;
+ padding-top:3px !important;
+ padding-bottom:7px !important;
+}
+
+
+/* v149: 原因修正
+   これまでカード内だけ line-height:1.2 + 上下padding だったため、
+   flex上端を揃えても日本語のベースラインが素の文より下になっていた。
+   投稿内ではカード本体を「素の文1行」と同じ line-height にする。
+   中国語訳は absolute のため、この高さ計算には入らない。 */
+.posted-row{
+ --post-line-h:1.55em !important;
+}
+.post .posted-card,
+.post .na-card{
+ position:relative !important;
+ top:0 !important;
+ transform:none !important;
+ align-self:flex-start !important;
+ vertical-align:top !important;
+ box-sizing:border-box !important;
+ height:var(--post-line-h) !important;
+ min-height:var(--post-line-h) !important;
+ padding:0 7px !important;
+ margin-top:0 !important;
+ margin-bottom:14px !important;
+ line-height:var(--post-line-h) !important;
+ display:inline-flex !important;
+ align-items:baseline !important;
+ justify-content:center !important;
+ overflow:visible !important;
+}
+
+/* メイン日本語は素の文と全く同じ1.55emの行箱。
+   top/translateでの微調整は一切しない。 */
+.post .posted-card > span:first-child{
+ position:static !important;
+ top:auto !important;
+ bottom:auto !important;
+ transform:none !important;
+ display:inline !important;
+ line-height:var(--post-line-h) !important;
+ white-space:nowrap !important;
+}
+
+/* 訳は行箱の外。カード・本文の縦位置には影響しない */
+.post .posted-card > .posted-cn{
+ position:absolute !important;
+ left:50% !important;
+ top:calc(100% + 2px) !important;
+ transform:translateX(-50%) !important;
+ margin:0 !important;
+ padding:0 !important;
+ height:auto !important;
+ line-height:1.05 !important;
+ white-space:nowrap !important;
+}
+
+/* 1文目・2文目とも同じ行箱・同じ上端基準 */
+.posted-row > .post-origin-line,
+.post .first-description,
+.post .town-post-sentence{
+ line-height:var(--post-line-h) !important;
+ align-items:flex-start !important;
+ align-content:flex-start !important;
+}
+.post .town-post-sentence > span:not(.posted-card):not(.na-card),
+.posted-row > .post-origin-line > span:not(.posted-card):not(.first-description){
+ line-height:var(--post-line-h) !important;
+ padding-top:0 !important;
+ padding-bottom:0 !important;
+}
+
+
+/* v150: 質問2の第2文を、条件成立時は必ず独立した2行目へ */
+#stage2QA .a2 .adj-answer-line.q2-second-own-line{
+  flex:0 0 100% !important;
+  width:max-content !important;
+  max-width:none !important;
+  white-space:nowrap !important;
+  margin-left:0 !important;
+}
+
+
+/* v151: 質問2は「地名＋は」を1行目、
+   答え文が単独1行に収まるなら答え文全体を2行目から */
+#stage2QA .a2 .adj-answer-line.q2-answer-own-line{
+  flex:0 0 100% !important;
+  width:max-content !important;
+  max-width:none !important;
+  white-space:nowrap !important;
+  margin-left:0 !important;
+}
+
+
+/* v152: 質問2の折返しルールを整理
+   1) 回答1＋回答2が1行に入る → そのまま1行
+   2) 回答2が2文 → 第2文を次の行へ
+   3) 第1文が「ちいさいですが、」 → その第1文を次の行へ */
+#stage2QA .a2 .adj-answer-line.q2-answer-own-line{
+ flex:0 0 auto !important;
+ width:max-content !important;
+}
+
+/* 2文ある場合、第2文は必ず次の行 */
+#stage2QA .a2 #shusshinAdjPreview .adj-answer-line:nth-child(2){
+ flex-basis:100% !important;
+ width:max-content !important;
+ white-space:nowrap !important;
+}
+
+/* 「ちいさいですが、」だけは第1文自体を次の行から */
+#stage2QA .a2 #shusshinAdjPreview .adj-answer-line.small-ga-line{
+ flex-basis:100% !important;
+ width:max-content !important;
+ white-space:nowrap !important;
+}
+
+
+/* v154: 質問2の回答ゾーンは元の自然な折返しに戻す */
+#stage2QA .a2 #shusshinAdjPreview .adj-answer-line,
+#stage2QA .a2 .adj-answer-line.q2-answer-own-line,
+#stage2QA .a2 #shusshinAdjPreview .adj-answer-line.small-ga-line,
+#stage2QA .a2 #shusshinAdjPreview .adj-answer-line.force-second-line{
+ flex:0 0 auto !important;
+ flex-basis:auto !important;
+ width:max-content !important;
+ max-width:100% !important;
+ white-space:nowrap !important;
+ margin-left:0 !important;
+}
+
+/* 投稿文：
+   2文ある場合は第2文を新しい行から。
+   「ちいさいですが、」で始まる第1文は、その文自体を新しい行から。 */
+.post .first-description .town-post-sentence.post-force-new-line{
+ flex-basis:100% !important;
+ width:max-content !important;
+ max-width:100% !important;
+ white-space:nowrap !important;
+}
+
+
+/* v156: 過去CSSの競合を最終的に上書き */
+
+/* 一段目の説明は「ちいさい」が選択中の時だけ。
+   以前の #adjTable > #adjChoiceNote {display:block!important} より強い指定にする。 */
+#adjTable > #adjChoiceNote{
+ display:none !important;
+}
+#adjTable.small-selected > #adjChoiceNote{
+ display:block !important;
+}
+
+/* 一段目・三段目の説明は、二段目選択後も絶対にサイズを変えない */
+#adjTable > #adjChoiceNote,
+#nameAdjTable > .choice-note{
+ font-size:12px !important;
+ line-height:15px !important;
+ min-height:15px !important;
+ height:15px !important;
+ font-weight:400 !important;
+ padding:0 !important;
+ margin:0 0 5px 0 !important;
+ box-sizing:border-box !important;
+ width:100% !important;
+ flex:0 0 15px !important;
+ transform:none !important;
+}
+
+/* 質問2の回答：各回答文の途中では絶対に折り返さない */
+#stage2QA .a2 #shusshinAdjPreview .adj-answer-line{
+ display:inline-flex !important;
+ flex:0 0 auto !important;
+ width:max-content !important;
+ max-width:none !important;
+ white-space:nowrap !important;
+ flex-wrap:nowrap !important;
+}
+
+/* 投稿文も、各回答文の途中では絶対に折り返さない */
+.post .first-description .town-post-sentence{
+ display:inline-flex !important;
+ width:max-content !important;
+ max-width:none !important;
+ white-space:nowrap !important;
+ flex-wrap:nowrap !important;
+}
+
+
+/* v157 FINAL OVERRIDE */
+
+/* 注記：表示条件と文字サイズを親レイアウトから完全に独立 */
+#adjChoiceNote,
+#nameAdjChoiceNote{
+ font-family:Arial,"Noto Sans SC",sans-serif !important;
+ font-size:12px !important;
+ line-height:15px !important;
+ font-weight:400 !important;
+ letter-spacing:0 !important;
+ text-size-adjust:none !important;
+ -webkit-text-size-adjust:none !important;
+ height:15px !important;
+ min-height:15px !important;
+ max-height:15px !important;
+ padding:0 !important;
+ margin:0 0 5px 0 !important;
+ transform:none !important;
+ zoom:1 !important;
+}
+#adjChoiceNote{display:none !important;}
+#adjTable.small-selected > #adjChoiceNote{display:block !important;}
+
+/* 質問2：回答文の「中」では折り返さない。
+   古い force / nth-child / q2-* 指定を全部打ち消す。 */
+#stage2QA .a2 #shusshinAdjPreview .adj-answer-line,
+#stage2QA .a2 #shusshinAdjPreview .adj-answer-line:nth-child(2),
+#stage2QA .a2 #shusshinAdjPreview .adj-answer-line.force-second-line,
+#stage2QA .a2 #shusshinAdjPreview .adj-answer-line.q2-second-own-line,
+#stage2QA .a2 #shusshinAdjPreview .adj-answer-line.q2-answer-own-line,
+#stage2QA .a2 #shusshinAdjPreview .adj-answer-line.small-ga-line{
+ display:inline-flex !important;
+ flex:0 0 auto !important;
+ flex-basis:auto !important;
+ width:max-content !important;
+ min-width:max-content !important;
+ max-width:none !important;
+ white-space:nowrap !important;
+ flex-wrap:nowrap !important;
+}
+
+/* 投稿：各「どんなところ」回答文の中も必ず横一行 */
+.post .first-description .town-post-sentence,
+.post .first-description .town-post-sentence.post-force-new-line{
+ display:inline-flex !important;
+ width:max-content !important;
+ min-width:max-content !important;
+ max-width:none !important;
+ white-space:nowrap !important;
+ flex-wrap:nowrap !important;
+}
+
+
+/* v158: 投稿の回答2が「ちいさいですが、」なら、
+   回答2全体を投稿の2行目から開始 */
+.post .post-origin-line > .first-description.small-ga-description{
+ flex-basis:100% !important;
+ width:100% !important;
+ margin-left:0 !important;
+}
+.post .post-origin-line > .first-description.small-ga-description
+> .town-post-sentence:first-child{
+ white-space:nowrap !important;
+ width:max-content !important;
+}
+
+
+/* v159: 投稿文の「ちいさいですが、」は回答2全体を2行目から。
+   first-description は display:contents のため、その親では改行できない。
+   post-origin-line直下に実体の100%幅flex itemを置いて確実に改行する。 */
+.post .post-origin-line > .post-q2-line-break{
+ display:block !important;
+ flex:0 0 100% !important;
+ width:100% !important;
+ height:0 !important;
+ min-height:0 !important;
+ margin:0 !important;
+ padding:0 !important;
+ border:0 !important;
+ line-height:0 !important;
+}
+
+
+/* v160: いいところボタンが最終行に入らない時は、
+   直後の次の1行に置く。カード訳用の下余白を反応欄へ持ち越さない。 */
+.post .reaction-area,
+.post .reaction-wrap,
+.post .metoo-area{
+ clear:none !important;
+ margin-top:0 !important;
+ padding-top:0 !important;
+}
+
+/* 右寄せ配置を解除された（次行へ落ちた）反応欄 */
+.post .reaction-area:not(.reaction-inline),
+.post .reaction-wrap:not(.reaction-inline),
+.post .metoo-area:not(.reaction-inline){
+ position:relative !important;
+ top:0 !important;
+ bottom:auto !important;
+ transform:none !important;
+ line-height:var(--post-line-h,1.55em) !important;
+}
+
+/* 投稿本文末尾から次行までの余分な空きを作らない */
+.posted-row{
+ row-gap:0 !important;
+}
+
+
+/* v161: 「ちいさいですが、」は2行目から始めるが、
+   「ですが、」の直後では改行しない。 */
+.post .first-description.ga-pair > .town-post-sentence:nth-child(2),
+.post .first-description.ga-pair > .town-post-sentence:nth-child(2).post-force-new-line{
+ flex:0 0 auto !important;
+ flex-basis:auto !important;
+ width:max-content !important;
+ min-width:max-content !important;
+ white-space:nowrap !important;
+}
+
+/* いいところボタン：
+   最終行に入らない時、♥×Nを通常フローから外す。
+   countが1行分の高さを消費していたのが「架空の行」の原因。 */
+.post:not(.like-fits-last-line) > .me-too-count{
+ position:absolute !important;
+ right:7px !important;
+ width:auto !important;
+ height:15px !important;
+ min-height:15px !important;
+ line-height:15px !important;
+ margin:0 !important;
+ padding:0 !important;
+ z-index:7 !important;
+}
+
+/* ボタンは本文直後の次行。訳用14px余白だけを相殺する。 */
+.post:not(.like-fits-last-line) > .me-too-wrap{
+ position:relative !important;
+ width:100% !important;
+ margin-top:-14px !important;
+ padding-top:0 !important;
+ justify-content:flex-end !important;
+}
+
+/* countはボタンの直前の実表示行の右端へ */
+.post:not(.like-fits-last-line) > .me-too-count{
+ bottom:calc(4px + 1.55em) !important;
+}
+
+
+/* v163: 投稿の「ですが文」は文全体を絶対に途中で折り返さない。
+   「ちいさいですが、＋次の形容詞＋です。」までを1つの横一行として扱う。 */
+.post .first-description.ga-pair{
+ display:inline-flex !important;
+ flex-wrap:nowrap !important;
+ width:max-content !important;
+ min-width:max-content !important;
+ max-width:none !important;
+ white-space:nowrap !important;
+}
+.post .first-description.ga-pair > .town-post-sentence,
+.post .first-description.ga-pair > .town-post-sentence.post-force-new-line{
+ display:inline-flex !important;
+ flex:0 0 auto !important;
+ flex-basis:auto !important;
+ width:max-content !important;
+ min-width:max-content !important;
+ max-width:none !important;
+ white-space:nowrap !important;
+ flex-wrap:nowrap !important;
+}
+
+
+/* v164: 投稿の左余白をさらに詰める */
+.post{
+ padding-left:4px !important;
+ padding-right:4px !important;
+ overflow-x:hidden !important;
+}
+.posted-row,
+.posted-name,
+.post-origin-line,
+.post-answer-line,
+.post-third-line,
+.post-final-line{
+ margin-left:0 !important;
+ padding-left:0 !important;
+}
+
+/* 名前と投稿文頭を左端近くへ */
+.post .posted-name{
+ margin-left:-1px !important;
+}
+.post .post-origin-line{
+ margin-left:-1px !important;
+}
+
+/* 投稿エリアでは横スクロールを絶対に出さない */
+#feed,
+.post,
+.posted-row{
+ overflow-x:hidden !important;
+ max-width:100% !important;
+}
+
+/* 「ですが文」は途中では折り返さないが、
+   画面幅そのものを超えないよう文字間・カード余白を少し圧縮 */
+.post .first-description.ga-pair{
+ max-width:100% !important;
+ min-width:0 !important;
+}
+.post .first-description.ga-pair .posted-card{
+ padding-left:4px !important;
+ padding-right:4px !important;
+}
+.post .first-description.ga-pair > .town-post-sentence{
+ min-width:0 !important;
+}
+
+
+/* v165: 「ですが文」が2行目に来た時の左端を、
+   通常の投稿文開始位置と完全に統一 */
+.post .post-origin-line > .post-q2-line-break{
+ flex-basis:100% !important;
+ width:100% !important;
+}
+
+.post .post-origin-line > .post-q2-line-break + .first-description,
+.post .post-origin-line > .post-q2-line-break + .first-description.ga-pair{
+ margin-left:0 !important;
+ padding-left:0 !important;
+}
+
+/* display:contents の子が前行の残り位置を引き継がないよう、
+   ですが文先頭を投稿行の左端基準に固定 */
+.post .post-origin-line > .post-q2-line-break
++ .first-description.ga-pair > .town-post-sentence:first-child{
+ margin-left:0 !important;
+ padding-left:0 !important;
+}
+
+/* post-origin-line 自体の開始位置と同じ値に統一 */
+.post .post-origin-line{
+ padding-left:0 !important;
+}
+
+
+/* v166: 名前と投稿本文の開始位置をさらに左へ */
+.post{
+ padding-left:1px !important;
+}
+
+/* 左の色線のすぐ右まで寄せる */
+.post .posted-name,
+.post .post-origin-line,
+.post .post-answer-line,
+.post .post-third-line,
+.post .post-final-line{
+ margin-left:-3px !important;
+ padding-left:0 !important;
+}
+
+/* 2行目へ送った「ですが文」も同じ開始位置 */
+.post .post-origin-line > .post-q2-line-break
++ .first-description.ga-pair > .town-post-sentence:first-child{
+ margin-left:0 !important;
+ padding-left:0 !important;
+}
+
+
+/* v167: 投稿本文だけ、さらに少し左へ */
+.post .post-origin-line,
+.post .post-answer-line,
+.post .post-third-line,
+.post .post-final-line{
+ margin-left:-5px !important;
+}
+
+/* ですが文の2行目も本文と同じ左端 */
+.post .post-origin-line > .post-q2-line-break
++ .first-description.ga-pair > .town-post-sentence:first-child{
+ margin-left:0 !important;
+}
+
+
+/* v168: 出身入力やり直しポップ */
+.origin-retry-popup{
+ position:fixed;
+ left:50%;
+ top:22%;
+ transform:translate(-50%,-8px);
+ z-index:9999;
+ display:none;
+ max-width:calc(100vw - 32px);
+ padding:10px 15px;
+ border:1px solid #9bcbe0;
+ border-radius:12px;
+ background:#eef9fd;
+ color:#234f63;
+ font-size:14px;
+ line-height:1.4;
+ font-weight:500;
+ box-shadow:0 4px 14px rgba(35,79,99,.16);
+ text-align:center;
+ white-space:nowrap;
+}
+.origin-retry-popup.show{
+ display:block;
+ animation:originRetryIn .16s ease-out;
+}
+@keyframes originRetryIn{
+ from{opacity:0;transform:translate(-50%,-13px);}
+ to{opacity:1;transform:translate(-50%,-8px);}
+}
+
+
+/* v169: やり直しポップは画面中央の正方形 */
+.origin-retry-popup{
+ left:50% !important;
+ top:50% !important;
+ width:180px !important;
+ height:180px !important;
+ max-width:calc(100vw - 40px) !important;
+ padding:18px !important;
+ transform:translate(-50%,-50%) !important;
+ border-radius:18px !important;
+ box-sizing:border-box !important;
+ display:none !important;
+ align-items:center !important;
+ justify-content:center !important;
+ text-align:center !important;
+ white-space:normal !important;
+ font-size:16px !important;
+ line-height:1.65 !important;
+}
+.origin-retry-popup.show{
+ display:flex !important;
+ animation:originRetryCenterIn .16s ease-out !important;
+}
+@keyframes originRetryCenterIn{
+ from{opacity:0;transform:translate(-50%,-50%) scale(.96);}
+ to{opacity:1;transform:translate(-50%,-50%) scale(1);}
+}
+
+
+/* v170: food版と同じ、投稿欄からぶら下がる三角ボタン */
+.feed-resizer{
+ height:24px !important;
+ margin:-1px 0 4px !important;
+ position:relative !important;
+ z-index:5 !important;
+}
+.feed-resizer button{
+ display:block !important;
+ width:38px !important;
+ height:24px !important;
+ margin:0 auto !important;
+ padding:0 !important;
+ border:1px solid var(--line) !important;
+ border-top:0 !important;
+ border-radius:0 0 10px 10px !important;
+ background:rgba(255,255,255,.9) !important;
+ color:#777 !important;
+ font-size:14px !important;
+ line-height:22px !important;
+ font-weight:700 !important;
+ box-shadow:0 2px 4px rgba(0,0,0,.04) !important;
+}
+.feed-resizer button:active{
+ transform:none !important;
+}
+
+</style>
+<style>
+/* 投稿の更新では自動移動せず、手動スクロールで読む。 */
+.feed{overflow-y:auto!important;overflow-anchor:none;scroll-behavior:auto!important;}
+#dontKnowNameBtn{
+ position:static !important;
+ transform:none !important;
+ margin:0 0 0 4px !important;
+ flex:0 0 auto;
+}
+</style>
+<script>
+function preserveFeedPosition(feed){
+ const top=feed.scrollTop;
+ const edge=feed.getBoundingClientRect().top;
+ const anchor=[...feed.querySelectorAll(":scope > .post")].find(post=>post.getBoundingClientRect().bottom>edge);
+ const id=anchor?.dataset.id;
+ const offset=anchor?anchor.getBoundingClientRect().top-edge:0;
+ return ()=>{
+   const current=id?[...feed.querySelectorAll(":scope > .post")].find(post=>post.dataset.id===id):null;
+   feed.scrollTop=current?feed.scrollTop+current.getBoundingClientRect().top-feed.getBoundingClientRect().top-offset:top;
+ };
+}
+</script>
+</head>
+<body>
+
+<div id="originRetryPopup" class="origin-retry-popup" role="alert" aria-live="polite">
+  <span id="originRetryText"></span>
+</div>
+
+<div id="nameModal" class="name-modal">
+  <div class="name-box">
+    
+    <input id="nameInput" class="name-input" placeholder="请输入姓名" maxlength="20">
+    <button id="nameOk" class="name-save" type="button">确定</button>
+  </div>
+</div>
+
+<div class="app">
+ <div class="board-title"></div>
+ <div id="feed" class="feed"><div class="empty">まだ投稿がありません。</div></div>
+
+ <div class="feed-resizer" aria-label="投稿欄の高さ調整">
+   <button id="feedToggleBtn" type="button" title="投稿欄を広げる">▼</button>
+ </div>
+
+ <div class="composer">
+  <div id="composerGuide" class="guide">发布一下自己的家乡吧。</div>
+  <div class="qa-grid">
+    <div class="q-cell q1">名前さんのまち は どちらですか。</div>
+    <div class="a-cell a1">
+      <input id="shusshinInput" class="travel-destination-input shusshin-input" type="text"
+             placeholder="用中文输入地名" autocomplete="off">
+      <span class="answer-desu">です。</span>
+      <button id="postBtn" class="post-btn" type="button" disabled>发布</button>
+    </div>
+
+    <div id="shusshinSecond" class="shusshin-second qa-contents">
+      <div class="q-cell q2">
+        <span id="shusshinSubject" class="preview-place"></span><span>は どんな ところですか。</span>
+      </div>
+      <div class="a-cell a2">
+        <span id="shusshinSubjectAnswer" class="origin-answer-text"></span><span>は</span>
+        <span id="shusshinAdjPreview"></span>
+      </div>
+
+      <div id="q3Cell" class="q-cell q3">
+        <span id="shusshinSubject3"></span><span>に なにが ありますか。</span>
+      </div>
+      <div id="a3Cell" class="a-cell a3">
+        <span id="shusshinSubjectAnswer3" class="origin-answer-text"></span><span>に</span>
+        <span id="thingPreview"></span><span id="arimasuText"></span>
+        <span id="nameInline" class="name-inline">
+          <span class="name-input-wrap">
+            <input id="thingNameInput" class="travel-destination-input thing-name-input" type="text"
+                 placeholder="请输入名称" autocomplete="off">
+          </span>
+          <span>です。</span>
+          <button id="dontKnowNameBtn" class="dont-know-name" type="button">名前知らない</button>
+        </span>
+      </div>
+
+      <div id="q5Cell" class="q-cell q5" hidden></div>
+      <div id="a5Cell" class="a-cell a5" hidden>
+        <span id="thingNameSubject"></span><span>は</span>
+        <span id="nameAdjPreview"></span>
+      </div>
+    </div>
+  </div>
+
+  <div id="adjTable" class="choice-table adjective-table"><div id="adjChoiceNote" class="choice-note adj-choice-note">可以选1个，也可以选2个哦</div>
+
+    
+    <div id="adjArea" class="choices shusshin-choices"></div>
+  </div>
+
+  <div id="thingTable" class="choice-table thing-table">
+    
+    <div id="thingArea" class="choices thing-choices"></div>
+  </div>
+
+  <div id="nameAdjTable" class="choice-table adjective-table name-adj-table" style="display:none">
+<div id="nameAdjChoiceNote" class="choice-note">可以选1个，也可以选2个哦</div>
+    <div id="nameAdjArea" class="choices shusshin-choices"></div>
+  </div>
+  </div>
+ </div>
+</div>
+<script>
+const NAME_KEY="weekend_user_name_v1";
+const POSTS_KEY="shusshin_posts_v1";
+const METOO_KEY="shusshin_metoo_by_name_v1";
+const OFFLINE_QUEUE_KEY="shusshin_offline_queue_v1";
+let userName=localStorage.getItem(NAME_KEY)||"";
+let posts=[];
+try{posts=JSON.parse(localStorage.getItem(POSTS_KEY))||[]}catch{posts=[]}
+
+const adjectives=[
+ ["おおきい","大",false],["ちいさい","小",false],
+ ["しずか","安静",true],["にぎやか","热闹",true],
+ ["きれい","漂亮",true],
+ ["みどりが おおい","绿化多",false],["ひとが おおい","人多",false],
+ ["いい","好",false]
+];
+let selectedAdjs=[];
+const things=[
+ ["やま","山"],["かわ","河"],["うみ","海"],["おてら","寺庙"],
+ ["こうえん","公园"],["おおきい たてもの","大型建筑"],["きれいな たてもの","漂亮的建筑"],["ゆうえんち","游乐园"],["すいぞくかん","水族馆"]
+];
+let selectedThing="";
+let selectedNameAdjs=[];
+const nameAdjectives=[
+ ...adjectives,
+ ["たのしい","玩得开心",false],
+ ["おもしろい","有趣",false],
+ ["ゆうめい","有名",true]
+];
+
+function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function inputValue(){return document.getElementById("shusshinInput").value.trim()}
+function alignSecondAnswer(){}
+
+function renderAdj(){
+ const area=document.getElementById("adjArea"); area.innerHTML="";
+ adjectives.forEach(([jp,cn])=>{
+  const b=document.createElement("button");
+  b.type="button";
+  b.className="choice"+(selectedAdjs.includes(jp)?" selected":"");
+  b.innerHTML=`<span class="jp">${jp}</span><span class="cn">${cn}</span>`;
+  b.onclick=()=>{
+   const i=selectedAdjs.indexOf(jp);
+   if(i>=0){
+     selectedAdjs.splice(i,1);
+   }else{
+     if(jp==="ちいさい"){
+       selectedAdjs=selectedAdjs.filter(x=>x!=="おおきい");
+       if(selectedAdjs.length>=2) selectedAdjs=selectedAdjs.slice(-1);
+       selectedAdjs.push("ちいさい");
+     }else if(selectedAdjs.includes("ちいさい")){
+       if(jp==="おおきい"){
+         selectedAdjs=["おおきい"];
+       }else{
+         selectedAdjs=["ちいさい",jp];
+       }
+     }else{
+       selectedAdjs=[jp];
+     }
+   }
+   renderAdj();
+   updateComposer();
+  };
+  area.appendChild(b);
+ });
+ const smallSelected=selectedAdjs.includes("ちいさい");
+ adjTable.classList.toggle("small-selected",smallSelected);
+ const note=document.getElementById("adjChoiceNote");
+ if(note) note.style.setProperty("display",smallSelected?"block":"none","important");
+}
+function renderNameAdj(){
+ const area=document.getElementById("nameAdjArea");
+ if(!area)return;
+ area.innerHTML="";
+ nameAdjectives.forEach(([jp,cn])=>{
+  const b=document.createElement("button");
+  b.type="button";
+  const sizeLocked=(selectedThing==="おおきい たてもの" && (jp==="おおきい" || jp==="ちいさい"));
+  b.disabled=sizeLocked;
+  b.className="choice"+(selectedNameAdjs.includes(jp)?" selected":"")+(sizeLocked?" disabled-choice":"");
+  b.innerHTML=`<span class="jp">${jp}</span><span class="cn">${cn}</span>`;
+  b.onclick=()=>{
+   const i=selectedNameAdjs.indexOf(jp);
+
+   if(i>=0){
+     selectedNameAdjs.splice(i,1);
+   }else{
+     // 3段目も対になる語は、後から押した方を優先
+     const opposite={
+       "おおきい":"ちいさい",
+       "ちいさい":"おおきい",
+       "にぎやか":"しずか",
+       "しずか":"にぎやか"
+     }[jp];
+
+     if(opposite){
+       const oi=selectedNameAdjs.indexOf(opposite);
+       if(oi>=0) selectedNameAdjs.splice(oi,1);
+     }
+
+     selectedNameAdjs.push(jp);
+     if(selectedNameAdjs.length>2) selectedNameAdjs.shift();
+   }
+
+   renderNameAdj();
+   updateComposer();
+  };
+  area.appendChild(b);
+ });
+}
+function thingCardsHtml(thing){
+ const card=(jp,cn)=>`<span class="posted-card thing-card"><span>${esc(jp)}</span><span class="posted-cn">${esc(cn)}</span></span>`;
+ if(thing==="おおきい たてもの"){
+  return card("おおきい","大")+card("たてもの","建筑");
+ }
+ if(thing==="きれいな たてもの"){
+  return card("きれい","漂亮")+'<span class="na-card">な</span>'+card("たてもの","建筑");
+ }
+ return card(thing,(things.find(x=>x[0]===thing)||[])[1]||"");
+}
+function renderThings(){
+ const area=document.getElementById("thingArea");
+ if(!area)return;
+ area.innerHTML="";
+ things.forEach(([jp,cn])=>{
+  const b=document.createElement("button");
+  b.type="button";
+  b.className="choice"+(selectedThing===jp?" selected":"");
+  const shownJp=(jp==="おおきい たてもの"||jp==="きれいな たてもの")
+    ? jp.replace(" たてもの","<br>たてもの")
+    : jp;
+  b.innerHTML=`<span class="jp">${shownJp}</span><span class="cn">${cn}</span>`;
+  b.onclick=()=>{
+   selectedThing=jp;
+   if(selectedThing==="おおきい たてもの"){
+     selectedNameAdjs=selectedNameAdjs.filter(x=>x!=="おおきい" && x!=="ちいさい");
+   }
+   renderThings();
+   renderNameAdj();
+   updateComposer();
+  };
+  area.appendChild(b);
+ });
+}
+
+function orderedTownAdjs(arr){
+ const a=(Array.isArray(arr)?arr:[]).filter(Boolean).slice(0,2);
+ if(a.length===2 && a.includes("ちいさい")){
+   const other=a.find(x=>x!=="ちいさい");
+   /* ちいさい＋しずか だけは例外にしない。それ以外は選択順に関係なくちいさいを先頭 */
+   if(other && other!=="しずか") return {ordered:["ちいさい",other], useGa:true};
+ }
+ return {ordered:a, useGa:false};
+}
+function townAdjHtml(adj, ending){
+ const item=adjectives.find(x=>x[0]===adj);
+ const needsNa=!!(item&&item[2]);
+ const noun=(adj==="おおきい"||adj==="ちいさい")?"まち":"ところ";
+ const shownNoun=(adj==="ちいさい" && ending==="ですが、") ? "" : noun;
+ return `<span class="adj-answer-line"><span class="posted-card shusshin-adj-card"><span>${esc(adj)}</span><span class="posted-cn">${esc(item?item[1]:"")}</span></span>${needsNa?'<span class="na-card">な</span>':""}<span>${shownNoun}${ending}</span></span>`;
+}
+
+function updateComposer(){
+ document.querySelector(".q1").textContent=(userName||"名前")+"さんのまち は どちらですか。";
+ const v=inputValue(), second=document.getElementById("shusshinSecond");
+ const adjTable=document.getElementById("adjTable");
+ if(adjTable) adjTable.style.display=v?"block":"none";
+ if(!v && (selectedAdjs.length || selectedThing)){
+   selectedAdjs=[];
+   selectedThing="";
+   renderAdj();
+   renderThings();
+ }
+ second.style.display=v?"contents":"none";
+ const subjectHtml=v?`<span>${esc(v)}</span>`:"";
+ document.getElementById("shusshinSubject").innerHTML=subjectHtml;
+ const q2Cell=document.querySelector(".q2");
+if(q2Cell) q2Cell.style.display=v?"block":"none";
+const a2Cell=document.getElementById("shusshinSubjectAnswer").parentElement;
+ a2Cell.style.display=selectedAdjs.length?"flex":"none";
+ a2Cell.style.visibility=selectedAdjs.length?"visible":"hidden";
+ document.getElementById("shusshinSubjectAnswer").textContent=v;
+ const showThird=!!(v&&(selectedAdjs.length || selectedThing));
+ const thingTable=document.getElementById("thingTable");
+ if(thingTable) thingTable.style.display=showThird?"block":"none";
+ document.getElementById("q3Cell").style.display=showThird?"block":"none";
+ document.getElementById("shusshinSubject3").textContent=v;
+ document.getElementById("shusshinSubjectAnswer3").textContent=v;
+ const thingBox=document.getElementById("thingPreview");
+ const a3Cell=document.getElementById("a3Cell");
+ if(a3Cell){
+   a3Cell.style.display=selectedThing?"flex":"none";
+   a3Cell.style.visibility=selectedThing?"visible":"hidden";
+ }
+ const nameInline=document.getElementById("nameInline");
+ if(nameInline){
+   nameInline.style.display=selectedThing?"inline-flex":"none";
+   const buildingThing=(selectedThing==="おおきい たてもの" || selectedThing==="きれいな たてもの");
+   nameInline.classList.toggle("name-next-line",buildingThing);
+ }
+
+ const nameInput=document.getElementById("thingNameInput");
+ const nameVal=nameInput?nameInput.value.trim():"";
+ const nameAdjTable=document.getElementById("nameAdjTable");
+ const a5Cell=document.getElementById("a5Cell");
+ const q5Cell=document.getElementById("q5Cell");
+ if(nameAdjTable){ nameAdjTable.hidden=!selectedThing; nameAdjTable.style.display=selectedThing ? "block" : "none"; nameAdjTable.classList.toggle("third-visible",!!selectedThing); }
+ if(q5Cell) q5Cell.hidden=true;
+ if(a5Cell){ a5Cell.hidden=!selectedThing; a5Cell.style.display=selectedThing ? "flex" : "none"; }
+ const ns=document.getElementById("thingNameSubject");
+ const knownName=!!nameVal && nameVal!=="×";
+ if(ns){
+   ns.textContent=knownName ? nameVal : "";
+   const wa=ns.nextElementSibling;
+   if(wa) wa.style.display=knownName ? "" : "none";
+ }
+ const np=document.getElementById("nameAdjPreview");
+ if(np){
+   const a=[...selectedNameAdjs];
+
+   // 2語の接続ルール
+   // 原則：Aです。そして、Bです。
+   // 指定された組み合わせだけ：Aですが、Bです。
+   let ordered=a;
+   let useGa=false;
+
+   if(a.length===2){
+     const has=(x)=>a.includes(x);
+
+     // 「ちいさい」＋「おおきい・しずか」以外：
+     // 選択順に関係なく「ちいさい」を先にして「ですが」
+     if(has("ちいさい")){
+       const other=a.find(x=>x!=="ちいさい");
+       if(other && other!=="おおきい" && other!=="しずか"){
+         ordered=["ちいさい",other];
+         useGa=true;
+       }
+     }
+
+     // 以下2組は、指定の並びで選んだ時だけ「ですが」
+     if(a[0]==="おおきい" && a[1]==="しずか"){
+       ordered=a;
+       useGa=true;
+     }
+     if(a[0]==="しずか" && a[1]==="ひとが おおい"){
+       ordered=a;
+       useGa=true;
+     }
+   }
+
+   np.innerHTML=ordered.map((adj,i)=>{
+     const item=nameAdjectives.find(x=>x[0]===adj);
+     const cn=item?item[1]:"";
+     let ending="です。";
+     if(ordered.length===2 && i===0){
+       ending=useGa ? "ですが、" : "です。そして、";
+     }
+     const body=(adj==="いい") ? "いい ところ" : esc(adj);
+     const card=(adj==="いい")
+       ? `<span class="posted-card"><span>いい</span><span class="posted-cn">${esc(cn)}</span></span><span>ところ</span>`
+       : `<span class="posted-card"><span>${esc(adj)}</span><span class="posted-cn">${esc(cn)}</span></span>`;
+     return `<span class="adj-answer-line">${card}<span>${ending}</span></span>`;
+   }).join("");
+ }
+ if(selectedThing){
+  thingBox.innerHTML=thingCardsHtml(selectedThing);
+  document.getElementById("arimasuText").textContent="が あります。";
+ }else{
+  thingBox.innerHTML="";
+  document.getElementById("arimasuText").textContent="";
+ }
+ const adjBox=document.getElementById("shusshinAdjPreview");
+ if(selectedAdjs.length){
+  const rule=orderedTownAdjs(selectedAdjs);
+  adjBox.innerHTML=rule.ordered.map((adj,i)=>{
+   if(rule.useGa && i===0){
+     const item=adjectives.find(x=>x[0]===adj);
+     return `<span class="adj-answer-line"><span class="posted-card shusshin-adj-card"><span>${esc(adj)}</span><span class="posted-cn">${esc(item?item[1]:"")}</span></span><span>ですが、</span></span>`;
+   }
+   return townAdjHtml(adj,"です。");
+  }).join("");
+ }else{
+  adjBox.innerHTML="";
+ }
+ const buildingWithName =
+   (selectedThing==="おおきい たてもの" || selectedThing==="きれいな たてもの") &&
+   !!nameVal && nameVal!=="×";
+ const hasNameOrUnknown = !!nameVal;
+ const canPost =
+   !!v && selectedAdjs.length>0 && !!selectedThing && !!userName &&
+   hasNameOrUnknown &&
+   (selectedNameAdjs.length>0 || buildingWithName);
+ document.getElementById("postBtn").disabled=!canPost;
+
+
+
+}
+document.getElementById("shusshinInput").addEventListener("input",updateComposer);
+document.getElementById("thingNameInput").addEventListener("input",()=>{
+ updateComposer();
+});
+document.getElementById("postBtn").onclick=postShusshin;
+
+function meTooMap(){try{return JSON.parse(localStorage.getItem(METOO_KEY))||{}}catch{return {}}}
+function meTooKey(id){return userName+"::"+id}
+function hasMeToo(id){return !!meTooMap()[meTooKey(id)]}
+function rememberMeToo(id){const m=meTooMap();m[meTooKey(id)]=true;localStorage.setItem(METOO_KEY,JSON.stringify(m))}
+
+function postShusshin(){
+ const place=inputValue();
+ const thingName=(document.getElementById("thingNameInput")?.value||"").trim();
+ const buildingWithName =
+   (selectedThing==="おおきい たてもの" || selectedThing==="きれいな たてもの") &&
+   !!thingName && thingName!=="×";
+ const hasNameOrUnknown = !!thingName;
+ const canPost = hasNameOrUnknown && (selectedNameAdjs.length>0 || buildingWithName);
+ if(!place||!selectedAdjs.length||!selectedThing||!userName||!canPost)return;
+ const p={
+   id:Date.now(),author:userName,place,
+   adjs:[...selectedAdjs],adj:selectedAdjs[0],
+   thing:selectedThing,thingName,
+   nameAdjs:[...selectedNameAdjs],
+   meTooCount:0,createdAt:Date.now()
+ };
+ posts.push(p); localStorage.setItem(POSTS_KEY,JSON.stringify(posts));
+ syncPostToDB(p); renderPosts();
+ selectedAdjs=[]; selectedThing=""; selectedNameAdjs=[];
+ const thingNameInputReset=document.getElementById("thingNameInput");
+ if(thingNameInputReset){thingNameInputReset.value="";thingNameInputReset.classList.remove("unknown-name");}
+ document.getElementById("shusshinInput").value="";
+ renderAdj();renderThings();renderNameAdj();updateComposer();
+}
+
+
+/* v126: Firebaseでいいね数だけ変化した場合は、投稿DOMを絶対に再生成しない */
+function postContentSignature(p){
+  return JSON.stringify({
+    id:String(p?.id??""),
+    author:p?.author??"",
+    place:p?.place??"",
+    adjs:Array.isArray(p?.adjs)?p.adjs:[],
+    adj:p?.adj??"",
+    thing:p?.thing??"",
+    thingName:p?.thingName??"",
+    nameAdjs:Array.isArray(p?.nameAdjs)?p.nameAdjs:[],
+    createdAt:p?.createdAt??""
+  });
+}
+function renderOrPatchPosts(nextPosts){
+  const next=Array.isArray(nextPosts)?nextPosts:[];
+  const oldById=new Map((Array.isArray(posts)?posts:[]).map(p=>[String(p.id),p]));
+  const newById=new Map(next.map(p=>[String(p.id),p]));
+
+  let structural=oldById.size!==newById.size;
+  if(!structural){
+    for(const [id,np] of newById){
+      const op=oldById.get(id);
+      if(!op || postContentSignature(op)!==postContentSignature(np)){
+        structural=true;
+        break;
+      }
+    }
+  }
+
+  posts=next;
+  if(structural){
+    renderPosts();
+  }else{
+    /* いいね同期は数字と選択状態だけ変更。投稿本体には触れない */
+    next.forEach(p=>updateReactionOnly(p.id));
+  }
+}
+
+function updateReactionOnly(id){
+  const p=posts.find(x=>String(x.id)===String(id));
+  if(!p)return;
+  const escId=(window.CSS&&CSS.escape)?CSS.escape(String(id)):String(id).replace(/"/g,'\\"');
+  const d=document.querySelector(`.post[data-post-id="${escId}"]`);
+  if(!d)return;
+
+  const count=d.querySelector(":scope > .me-too-count");
+  const value=Number(p.meTooCount)||0;
+  const nextText=value>0 ? `♥×${value}` : "";
+  if(count && count.textContent!==nextText) count.textContent=nextText;
+
+  const btn=d.querySelector(".me-too-btn");
+  if(btn){
+    const reacted=hasReacted(id);
+    btn.setAttribute("aria-pressed",reacted?"true":"false");
+    /* 寸法は変えず、二重クリックだけ防ぐ */
+    if(userName!=="あさの") btn.disabled=reacted;
+  }
+}
+
+async function toggleMeToo(id){
+ const p=posts.find(x=>String(x.id)===String(id));
+ const unlimited=userName==="あさの";
+ if(!p||(!unlimited&&hasMeToo(id)))return;
+ if(!unlimited)rememberMeToo(id);
+ p.meTooCount=Number(p.meTooCount||0)+1;
+ localStorage.setItem(POSTS_KEY,JSON.stringify(posts));
+ incrementMeTooDB(id);updateReactionOnly(id);
+}
+
+function renderPosts(){
+ const guide=document.getElementById("composerGuide");
+ if(guide){
+   guide.textContent=posts.length
+     ? "发布一下自己的家乡吧。（也可以再写一个哦）"
+     : "发布一下自己的家乡吧。";
+ }
+
+ const feed=document.querySelector(".feed");
+ if(!feed)return;
+ const restorePosition=preserveFeedPosition(feed);
+ feed.innerHTML="";
+ posts.forEach(p=>{
+  const d=document.createElement("div");d.className="post "+(p.author===userName?"own-post":"other-post");
+  d.dataset.postId=p.id;d.dataset.id=p.id;
+  const row=document.createElement("div");row.className="posted-row";
+
+  const postAdjs=(Array.isArray(p.adjs)&&p.adjs.length?p.adjs:[p.adj]).filter(Boolean).slice(0,2);
+  const answers=postAdjs.map((adj,i)=>{
+   const item=adjectives.find(x=>x[0]===adj);
+   const cn=item?item[1]:"";
+   const needsNa=!!(item&&item[2]);
+   const noun=(adj==="おおきい"||adj==="ちいさい")?"まち":"ところ";
+   return `<span class="post-answer-line">
+     ${i===0?`<span class="posted-place-plain">${esc(p.place)}</span><span>は</span>`:""}
+     <span class="posted-card"><span>${esc(adj)}</span><span class="posted-cn">${esc(cn)}</span></span>
+     ${needsNa?'<span class="na-card">な</span>':""}<span>${noun}です。</span>
+   </span>`;
+  }).join("");
+
+  const thingLine=p.thing?`<span class="post-third-line">
+    <span class="posted-place-plain">${esc(p.place)}</span><span>に</span>
+    ${thingCardsHtml(p.thing)}
+    <span>が あります。</span>
+    ${p.thingName&&p.thingName!=="×"?`<span class="posted-place-plain">${esc(p.thingName)}</span><span>です。</span>`:""}
+  </span>`:"";
+
+  let finalLine="";
+  const nas=(Array.isArray(p.nameAdjs)?p.nameAdjs:[]).filter(Boolean).slice(0,2);
+  if(p.thingName && nas.length){
+    let ordered=[...nas], useGa=false;
+    if(nas.length===2){
+      if(nas.includes("ちいさい")){
+        const other=nas.find(x=>x!=="ちいさい");
+        if(other && other!=="おおきい" && other!=="しずか"){
+          ordered=["ちいさい",other]; useGa=true;
+        }
+      }
+      if(nas[0]==="おおきい" && nas[1]==="しずか"){ordered=[...nas];useGa=true;}
+      if(nas[0]==="しずか" && nas[1]==="ひとが おおい"){ordered=[...nas];useGa=true;}
+    }
+    const parts=ordered.map((adj,i)=>{
+      const item=nameAdjectives.find(x=>x[0]===adj);
+      const cn=item?item[1]:"";
+      const card=`<span class="posted-card"><span>${esc(adj)}</span><span class="posted-cn">${esc(cn)}</span></span>${adj==="いい"?'<span>ところ</span>':""}`;
+
+      if(ordered.length===1) return `${card}<span>です。</span>`;
+
+      if(i===0){
+        return `${card}<span>${useGa?"ですが、":"です。"}</span>`;
+      }
+
+      /* 「そして、」は次の形容詞と同じ塊。
+         そのため「そして、」直後では折り返さない。
+         形容詞の後（です。の前）では折り返し可能。 */
+      return `${useGa?"":'<span class="connector-with-adj"><span>そして、</span>'+card+'</span>'}${useGa?card:""}<span>です。</span>`;
+    }).join("");
+    finalLine=`<span class="post-third-line post-final-line">${p.thingName!=="×"?`<span class="posted-place-plain">${esc(p.thingName)}</span><span>は</span>`:""}${parts}</span>`;
+  }
+
+  let firstDescription="";
+  if(postAdjs.length){
+    const rule=orderedTownAdjs(postAdjs);
+    const descriptions=rule.ordered.map((adj,i)=>{
+      const item=adjectives.find(x=>x[0]===adj);
+      const cn=item?item[1]:"";
+      const needsNa=!!(item&&item[2]);
+
+      if(rule.useGa && i===0){
+        return `<span class="town-post-sentence">
+          <span class="posted-place-plain">${esc(p.place)}</span><span>は</span>
+          <span class="posted-card"><span>${esc(adj)}</span><span class="posted-cn">${esc(cn)}</span></span>
+          <span>ですが、</span>
+        </span>`;
+      }
+
+      const noun=(adj==="おおきい"||adj==="ちいさい")?"まち":"ところ";
+      return `<span class="town-post-sentence">
+        ${i===0?`<span class="posted-place-plain">${esc(p.place)}</span><span>は</span>`:""}
+        <span class="posted-card"><span>${esc(adj)}</span><span class="posted-cn">${esc(cn)}</span></span>
+        ${needsNa?'<span class="na-card">な</span>':""}<span>${noun}です。</span>
+      </span>`;
+    }).join("");
+    /* 「ちいさいですが、」の時は first-description の前に
+       実体のflex改行要素を置く。first-description は display:contents なので、
+       親にclassを付ける方式では改行できない。 */
+    const postQ2Break=rule.useGa ? '<span class="post-q2-line-break" aria-hidden="true"></span>' : '';
+    firstDescription=`${postQ2Break}<span class="first-description${rule.useGa ? " ga-pair" : ""}">${descriptions}</span>`;
+  }
+
+  row.innerHTML=`<span class="posted-name">（${esc(p.author)}）</span>
+    <span class="post-origin-line">
+      <span class="shusshin-wa">出身は</span><span class="posted-place-plain">${esc(p.place)}</span><span>です。</span>
+      ${firstDescription}
+    </span>
+    ${thingLine}${finalLine}`;
+  d.appendChild(row);
+
+  const wrap=document.createElement("div");wrap.className="me-too-wrap";
+  const count=document.createElement("span");count.className="me-too-count";
+  count.textContent=Number(p.meTooCount||0)>0?`♥×${Number(p.meTooCount||0)}`:"";
+  const btn=document.createElement("button");
+  const done=userName!=="あさの"&&hasMeToo(p.id);
+  btn.className="me-too-btn"+(done?" liked":"");btn.disabled=done;
+  btn.textContent="♥ いい ところ ですね。";
+  /* v119: いいね操作を投稿カードの長押し削除判定へ伝播させない */
+  ["pointerdown","pointerup","pointercancel","click"].forEach(type=>{
+    btn.addEventListener(type,e=>e.stopPropagation());
+  });
+  btn.onclick=(e)=>{
+    e.stopPropagation();
+    toggleMeToo(p.id);
+  };
+  wrap.append(btn);
+  ["pointerdown","pointerup","pointercancel","click"].forEach(type=>{
+    wrap.addEventListener(type,e=>e.stopPropagation());
+  });
+  d.appendChild(count);
+  d.appendChild(wrap);
+
+  let timer=null;
+  const start=()=>{if(userName!=="あさの")return;timer=setTimeout(()=>deletePost(p.id),750)};
+  const cancel=()=>{if(timer){clearTimeout(timer);timer=null}};
+  d.addEventListener("pointerdown",start);d.addEventListener("pointerup",cancel);
+  d.addEventListener("pointerleave",cancel);d.addEventListener("pointercancel",cancel);
+  feed.appendChild(d);
+ });
+ restorePosition();
+ requestAnimationFrame(()=>requestAnimationFrame(()=>requestAnimationFrame(restorePosition)));
+}
+function deletePost(id){
+ if(userName!=="あさの")return;
+ if(!confirm("この投稿を削除しますか？"))return;
+ posts=posts.filter(p=>String(p.id)!==String(id));
+ localStorage.setItem(POSTS_KEY,JSON.stringify(posts));
+ syncDeleteFromDB(id);renderPosts();
+}
+
+/* 名前モーダル：前サイトと同じく毎回表示 */
+function ensureNameModal(){
+ const modal=document.getElementById("nameModal");
+ const input=document.getElementById("nameInput");
+ const ok=document.getElementById("nameOk");
+ userName=localStorage.getItem(NAME_KEY)||"";
+ input.value=userName;
+ modal.style.display="flex";
+ setTimeout(()=>input.focus(),50);
+ const save=()=>{
+   const n=input.value.trim();
+   if(!n)return;
+   userName=n;
+   localStorage.setItem(NAME_KEY,userName);
+   modal.style.display="none";
+   updateComposer();
+   renderPosts();
+ };
+ ok.onclick=save;
+ input.onkeydown=e=>{if(e.key==="Enter")save();};
+}
+
+/* Firebase + オフラインキュー */
+const firebaseConfig={
+ apiKey:"AIzaSyCaLCM4TXURROKyDKD_Mga8ZnWr1-Wk9Wg",
+ authDomain:"database-s-9e4b3.firebaseapp.com",
+ databaseURL:"https://database-s-9e4b3-default-rtdb.asia-southeast1.firebasedatabase.app",
+ projectId:"database-s-9e4b3",storageBucket:"database-s-9e4b3.firebasestorage.app",
+ messagingSenderId:"13648984683",appId:"1:13648984683:web:c782d2963c253df69b8f2e"
+};
+const DB_POSTS_PATH="shusshinSentence/posts";
+let db,dbRef,dbSet,dbRemove,dbRunTransaction,firebaseReady=false;
+function readQ(){try{return JSON.parse(localStorage.getItem(OFFLINE_QUEUE_KEY))||[]}catch{return []}}
+function writeQ(q){localStorage.setItem(OFFLINE_QUEUE_KEY,JSON.stringify(q))}
+function queue(op){const q=readQ();q.push({...op,qid:Date.now()+"_"+Math.random()});writeQ(q)}
+async function flushQ(){
+ if(!firebaseReady||!navigator.onLine)return;
+ const remain=[];
+ for(const op of readQ()){
+  try{
+   if(op.type==="post")await dbSet(dbRef(db,DB_POSTS_PATH+"/"+op.post.id),op.post);
+   if(op.type==="delete")await dbRemove(dbRef(db,DB_POSTS_PATH+"/"+op.id));
+   if(op.type==="metoo")await dbRunTransaction(dbRef(db,DB_POSTS_PATH+"/"+op.id+"/meTooCount"),v=>Number(v||0)+1);
+  }catch(e){remain.push(op)}
+ }
+ writeQ(remain);
+}
+async function syncPostToDB(p){
+ if(!firebaseReady||!navigator.onLine){queue({type:"post",post:p});return}
+ try{await dbSet(dbRef(db,DB_POSTS_PATH+"/"+p.id),p)}catch{queue({type:"post",post:p})}
+}
+async function syncDeleteFromDB(id){
+ if(!firebaseReady||!navigator.onLine){queue({type:"delete",id});return}
+ try{await dbRemove(dbRef(db,DB_POSTS_PATH+"/"+id))}catch{queue({type:"delete",id})}
+}
+async function incrementMeTooDB(id){
+ if(!firebaseReady||!navigator.onLine){queue({type:"metoo",id});return}
+ try{await dbRunTransaction(dbRef(db,DB_POSTS_PATH+"/"+id+"/meTooCount"),v=>Number(v||0)+1)}
+ catch{queue({type:"metoo",id})}
+}
+async function initFirebase(){
+ try{
+  const A=await import("https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js");
+  const D=await import("https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js");
+  db=D.getDatabase(A.initializeApp(firebaseConfig));dbRef=D.ref;dbSet=D.set;dbRemove=D.remove;dbRunTransaction=D.runTransaction;
+  firebaseReady=true;await flushQ();
+  D.onValue(dbRef(db,DB_POSTS_PATH),snap=>{
+   const val=snap.val()||{};
+   const nextPosts=Object.entries(val)
+    .map(([id,p])=>({...p,id:p.id??id,meTooCount:Number(p.meTooCount||0)}))
+    .sort((a,b)=>Number(a.createdAt||a.id)-Number(b.createdAt||b.id));
+
+   /* v127:
+      Firebaseのいいね更新で feed.innerHTML="" → 全投稿再生成、となっていたのが
+      ちらつきの本当の原因。本文構造が同じなら反応数だけ差し替える。 */
+   renderOrPatchPosts(nextPosts);
+   localStorage.setItem(POSTS_KEY,JSON.stringify(posts));
+  });
+ }catch(e){console.error(e)}
+}
+window.addEventListener("online",flushQ);
+window.addEventListener("resize",()=>requestAnimationFrame(alignSecondAnswer));
+window.addEventListener("orientationchange",()=>setTimeout(alignSecondAnswer,100));
+setInterval(()=>{if(firebaseReady&&navigator.onLine&&readQ().length)flushQ()},5000);
+
+ensureNameModal();renderAdj();renderNameAdj();renderThings();updateComposer();renderPosts();initFirebase();
+
+const _thingNameInput=document.getElementById("thingNameInput");
+const _dontKnowNameBtn=document.getElementById("dontKnowNameBtn");
+if(_thingNameInput && _dontKnowNameBtn){
+ _dontKnowNameBtn.addEventListener("click",(e)=>{
+  e.preventDefault();
+  _thingNameInput.value="×";
+  _thingNameInput.classList.add("unknown-name");
+  _thingNameInput.dispatchEvent(new Event("input",{bubbles:true}));
+ });
+ _thingNameInput.addEventListener("pointerdown",()=>{
+  if(_thingNameInput.value==="×"){
+   _thingNameInput.value="";
+   _thingNameInput.classList.remove("unknown-name");
+   _thingNameInput.dispatchEvent(new Event("input",{bubbles:true}));
+   setTimeout(()=>_thingNameInput.focus(),0);
+  }
+ });
+ _thingNameInput.addEventListener("input",()=>{
+  if(_thingNameInput.value!=="×") _thingNameInput.classList.remove("unknown-name");
+ });
+}
+
+</script>
+<script>
+/* v87: 投稿欄高さ切替 */
+(()=>{
+ const feed=document.getElementById("feed");
+ const btn=document.getElementById("feedToggleBtn");
+ if(!feed||!btn)return;
+ let expanded=false;
+ const applyState=()=>{
+   feed.style.setProperty("height",expanded ? "72vh" : "300px","important");
+   btn.textContent=expanded ? "▲" : "▼";
+   btn.title=expanded ? "投稿欄を元に戻す" : "投稿欄を広げる";
+ };
+ btn.addEventListener("click",()=>{
+   expanded=!expanded;
+   applyState();
+ });
+
+ /* 投稿欄が広がっている時、地名入力欄を押したら元の高さへ戻す */
+ const placeInput=document.getElementById("shusshinInput");
+ if(placeInput){
+   placeInput.addEventListener("focus",()=>{
+     if(expanded){
+       expanded=false;
+       applyState();
+     }
+   });
+ }
+ const setExpandedIfPosted=()=>{
+   const hasPosted=feed.querySelector(".post");
+   if(hasPosted && !expanded){
+     expanded=true;
+     applyState();
+   }
+ };
+ setTimeout(setExpandedIfPosted,0);
+ const observer=new MutationObserver(setExpandedIfPosted);
+ observer.observe(feed,{childList:true,subtree:true});
+})();
+</script>
+
+<script>
+/* v108: 各質問・回答を対応するボタン群の直前に配置 */
+(()=>{
+ function arrangeQuestionBlocks(){
+   const adjTable=document.getElementById("adjTable");
+   const thingTable=document.getElementById("thingTable");
+   const nameAdjTable=document.getElementById("nameAdjTable");
+   const q2=document.querySelector(".q2");
+   const a2=document.querySelector(".a2");
+   const q3=document.getElementById("q3Cell");
+   const a3=document.getElementById("a3Cell");
+   const q5=document.getElementById("q5Cell");
+   const a5=document.getElementById("a5Cell");
+
+   function block(id,q,a,before){
+     if(!before||!q||!a)return;
+     let wrap=document.getElementById(id);
+     if(!wrap){
+       wrap=document.createElement("div");
+       wrap.id=id;
+       wrap.className="qa-stage-block";
+       before.parentNode.insertBefore(wrap,before);
+     }
+     wrap.appendChild(q);
+     wrap.appendChild(a);
+   }
+   block("stage2QA",q2,a2,adjTable);
+   block("stage3QA",q3,a3,thingTable);
+   block("stage5QA",q5,a5,nameAdjTable);
+ }
+ arrangeQuestionBlocks();
+})();
+</script>
+
+
+<style>
+/* v112: ♥×N といいねボタンを「行」で正確に配置 */
+.post{position:relative !important;}
+
+.post > .me-too-count{
+  position:static !important;
+  display:block !important;
+  width:100% !important;
+  box-sizing:border-box !important;
+  text-align:right !important;
+  margin:4px 0 2px !important;
+  padding:0 7px 0 0 !important;
+  white-space:nowrap !important;
+  float:none !important;
+}
+.post > .me-too-wrap,
+.post.metoo-inline > .me-too-wrap,
+.post.metoo-row2 > .me-too-wrap,
+.post.metoo-row3 > .me-too-wrap,
+.post.reaction-inline > .me-too-wrap,
+.post.reaction-on-last-line > .me-too-wrap{
+  position:static !important;
+  display:flex !important;
+  width:100% !important;
+  max-width:100% !important;
+  justify-content:flex-end !important;
+  align-items:center !important;
+  margin:0 !important;
+  padding:0 !important;
+  box-sizing:border-box !important;
+  clear:both !important;
+  inset:auto !important;
+}
+
+/* ボタンが最終行に入る時 */
+.post.reaction-fit-last-line > .me-too-wrap{
+  position:absolute !important;
+  width:auto !important;
+  max-width:none !important;
+  right:7px !important;
+  top:var(--reaction-btn-top) !important;
+  margin:0 !important;
+  z-index:6 !important;
+}
+
+/* ♥×N は、その一つ前の実表示行の右端 */
+.post.reaction-fit-last-line > .me-too-count{
+  position:absolute !important;
+  display:block !important;
+  width:auto !important;
+  right:7px !important;
+  top:var(--reaction-count-top) !important;
+  margin:0 !important;
+  padding:0 !important;
+  line-height:1 !important;
+  z-index:6 !important;
+}
+
+.post.reaction-fit-last-line .posted-row,
+.post.reaction-fit-last-line .post-origin-line,
+.post.reaction-fit-last-line .post-third-line,
+.post.reaction-fit-last-line .post-final-line{
+  padding-right:0 !important;
+  margin-right:0 !important;
+  max-width:100% !important;
+}
+</style>
+
+
+<script>
+/* v125: 投稿生成後/画面幅変更時だけ測定。いいねクリックでは再配置しない */
+(()=>{
+ const GAP=10, RIGHT=7;
+
+ function textRects(root){
+   const out=[];
+   const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
+   let n;
+   while((n=walker.nextNode())){
+     if(!n.nodeValue || !n.nodeValue.trim())continue;
+     const el=n.parentElement;
+     if(!el || el.closest(".posted-cn"))continue;
+     const cs=getComputedStyle(el);
+     if(cs.display==="none" || cs.visibility==="hidden")continue;
+     const r=document.createRange();
+     r.selectNodeContents(n);
+     [...r.getClientRects()].forEach(x=>{
+       if(x.width>0 && x.height>0)out.push(x);
+     });
+   }
+   root.querySelectorAll(".posted-card").forEach(el=>{
+     const r=el.getBoundingClientRect();
+     if(r.width>0 && r.height>0)out.push(r);
+   });
+   return out;
+ }
+
+ function place(post){
+   post.classList.remove("like-fits-last-line");
+   post.style.removeProperty("--like-top");
+
+   const row=post.querySelector(".posted-row");
+   const wrap=post.querySelector(":scope > .me-too-wrap");
+   const btn=wrap?.querySelector(".me-too-btn");
+   if(!row || !wrap || !btn)return;
+
+   const rects=textRects(row);
+   if(!rects.length)return;
+
+   const maxBottom=Math.max(...rects.map(r=>r.bottom));
+   const lastRects=rects.filter(r=>Math.abs(r.bottom-maxBottom)<5);
+   if(!lastRects.length)return;
+
+   const lastRight=Math.max(...lastRects.map(r=>r.right));
+   const lastTop=Math.min(...lastRects.map(r=>r.top));
+   const lastBottom=Math.max(...lastRects.map(r=>r.bottom));
+
+   const pr=post.getBoundingClientRect();
+   const pcs=getComputedStyle(post);
+   const usableRight=pr.right
+     -parseFloat(pcs.borderRightWidth||0)
+     -parseFloat(pcs.paddingRight||0)
+     -RIGHT;
+   const bw=btn.getBoundingClientRect().width;
+
+   if(usableRight-lastRight >= bw+GAP){
+     const bh=btn.getBoundingClientRect().height;
+     const top=((lastTop+lastBottom)/2)-(bh/2)-pr.top;
+     post.style.setProperty("--like-top",Math.max(0,top)+"px");
+     post.classList.add("like-fits-last-line");
+   }
+ }
+
+ function placeAll(){
+   requestAnimationFrame(()=>requestAnimationFrame(()=>{
+     document.querySelectorAll(".post").forEach(place);
+   }));
+ }
+
+ const feed=document.getElementById("feed");
+ if(feed){
+   /* 投稿そのものが追加/削除された時だけ */
+   new MutationObserver(ms=>{
+     if(ms.some(m=>[...m.addedNodes,...m.removedNodes].some(
+       n=>n.nodeType===1 && (n.classList?.contains("post") || n.querySelector?.(".post"))
+     ))) placeAll();
+   }).observe(feed,{childList:true,subtree:false});
+ }
+ window.addEventListener("resize",placeAll);
+ document.fonts?.ready?.then(placeAll);
+ placeAll();
+})();
+</script>
+
+
+
+
+
+
+<script>
+/* v154: 折返しルールは「投稿文」にだけ適用 */
+(()=>{
+ function applyPostWrapRules(root=document){
+   root.querySelectorAll(".post .first-description").forEach(fd=>{
+     const lines=[...fd.querySelectorAll(":scope > .town-post-sentence")];
+     lines.forEach(x=>x.classList.remove("post-force-new-line"));
+     if(!lines.length)return;
+
+     /* 「ちいさいですが、」の文は、その文を次行から */
+     const firstText=(lines[0].textContent||"").replace(/\s+/g,"");
+     if(firstText.includes("ちいさいですが、")){
+       lines[0].classList.add("post-force-new-line");
+     }
+
+     /* 回答2が2文なら、第2文を次行から */
+     if(lines.length>=2){
+       lines[1].classList.add("post-force-new-line");
+     }
+   });
+ }
+ const feed=document.getElementById("feed");
+ if(feed){
+   new MutationObserver(ms=>{
+     if(ms.some(m=>m.type==="childList"))applyPostWrapRules(feed);
+   }).observe(feed,{childList:true,subtree:true});
+ }
+ requestAnimationFrame(()=>applyPostWrapRules(document));
+})();
+</script>
+
+
+
+<script>
+/* v160: 反応ボタンが最終行に収まらない場合の縦位置を補正 */
+(()=>{
+ function fixReactionRows(){
+   document.querySelectorAll(".post").forEach(post=>{
+     const area=post.querySelector(".reaction-area,.reaction-wrap,.metoo-area");
+     if(!area)return;
+
+     /* absolute/right配置中は既存ロジックを尊重 */
+     const cs=getComputedStyle(area);
+     if(cs.position==="absolute")return;
+
+     area.style.setProperty("margin-top","0","important");
+     area.style.setProperty("padding-top","0","important");
+     area.style.setProperty("top","0","important");
+     area.style.setProperty("transform","none","important");
+   });
+ }
+ const feed=document.getElementById("feed");
+ if(feed)new MutationObserver(()=>requestAnimationFrame(fixReactionRows))
+   .observe(feed,{childList:true,subtree:true});
+ window.addEventListener("resize",()=>requestAnimationFrame(fixReactionRows));
+ requestAnimationFrame(fixReactionRows);
+})();
+</script>
+
+
+<script>
+/* v168: 出身欄の入力チェック
+   優先順：かな → 広西 → 省/州/市 */
+(()=>{
+ const input=document.getElementById("shusshinInput");
+ const pop=document.getElementById("originRetryPopup");
+ const text=document.getElementById("originRetryText");
+ if(!input||!pop||!text)return;
+
+ let timer=null;
+ function show(msg){
+   clearTimeout(timer);
+   text.innerHTML=msg;
+   pop.classList.remove("show");
+   void pop.offsetWidth;
+   pop.classList.add("show");
+   timer=setTimeout(()=>pop.classList.remove("show"),2200);
+ }
+
+ function validate(){
+   const v=input.value.trim();
+   if(!v)return true;
+
+   if(/[\u3040-\u309F\u30A0-\u30FF]/.test(v)){
+     show("请用中文输入地名。<br>请重新输入。");
+     input.value="";
+     input.dispatchEvent(new Event("input",{bubbles:true}));
+     input.focus();
+     return false;
+   }
+   if(v.includes("広西") || v.includes("广西")){
+     show("请不要输入“广西”。<br>只输入地名就可以。");
+     input.value="";
+     input.dispatchEvent(new Event("input",{bubbles:true}));
+     input.focus();
+     return false;
+   }
+   if(/[省州市]/.test(v)){
+     const hit=v.match(/[省州市]/)?.[0] || "";
+     show(`请不要输入“${hit}”。<br>只输入地名就可以。`);
+     input.value="";
+     input.dispatchEvent(new Event("input",{bubbles:true}));
+     input.focus();
+     return false;
+   }
+   return true;
+ }
+
+ input.addEventListener("change",validate);
+ input.addEventListener("blur",()=>{ if(input.value.trim()) validate(); });
+
+ /* 发布時にも必ず検査 */
+ document.addEventListener("click",e=>{
+   const btn=e.target.closest("button");
+   if(!btn)return;
+   if((btn.textContent||"").trim()==="发布" && !validate()){
+     e.preventDefault();
+     e.stopImmediatePropagation();
+   }
+ },true);
+})();
+</script>
+
+</body>
+</html>
+
+<style>
+.me-too-wrap{display:flex;justify-content:flex-end;align-items:center;gap:6px;margin-top:4px}
+.me-too-count{font-size:13px;color:#286b8a;font-weight:700;white-space:nowrap}
+.me-too-btn{border:1px solid #9bcbe0;background:#f5fbf2;color:#286b8a;border-radius:9px;padding:5px 9px;font-size:12px;font-weight:700;cursor:pointer}
+.me-too-btn:hover{background:#eef9fd}
+.me-too-btn.liked{background:#d8ebcf;color:#234f63;border-color:#8eb47c}
+.me-too-btn:disabled{cursor:default;opacity:.58}
+</style>
