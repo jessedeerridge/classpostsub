@@ -4900,7 +4900,7 @@ function updateReactionOnly(id){
 
   const btn=d.querySelector(".me-too-btn");
   if(btn){
-    const reacted=hasReacted(id);
+    const reacted=hasMeToo(id);
     btn.setAttribute("aria-pressed",reacted?"true":"false");
     /* 寸法は変えず、二重クリックだけ防ぐ */
     if(userName!=="あさの") btn.disabled=reacted;
@@ -5031,7 +5031,7 @@ function renderPosts(){
   const btn=document.createElement("button");
   const done=userName!=="あさの"&&hasMeToo(p.id);
   btn.className="me-too-btn"+(done?" liked":"");btn.disabled=done;
-  btn.textContent="♥ いい ところ ですね。";
+  btn.textContent="♥ いいですね！";
   /* v119: いいね操作を投稿カードの長押し削除判定へ伝播させない */
   ["pointerdown","pointerup","pointercancel","click"].forEach(type=>{
     btn.addEventListener(type,e=>e.stopPropagation());

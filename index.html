@@ -5,10 +5,21 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>これは なんですか。</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#dff2fb;color:#292929;font-family:"Yu Kyokasho","BIZ UDPGothic","Noto Sans JP",sans-serif}.app{width:min(1050px,96vw);margin:auto;padding:12px 0 24px}button,input{font:inherit}button{cursor:pointer}.feed{height:330px;overflow-y:auto;background:#ffffffbf;border:1px solid #9bcbe0;border-radius:14px;padding:6px;display:flex;flex-direction:column;gap:8px}.empty{margin:auto;color:#888;font-size:14px}.post{background:#fff;border:1px solid #9bcbe0;border-left:4px solid #6db9dc;border-radius:10px;padding:10px;flex:none}.post-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;font-size:13px;color:#666}.delete{background:none;border:0;color:#777;padding:4px 8px}.post-image{display:block;max-width:100%;max-height:280px;object-fit:contain;border-radius:8px;margin-bottom:10px}.sentence{display:flex;flex-wrap:wrap;align-items:center;gap:5px;font-size:19px;line-height:1.7;margin:8px 0 16px;overflow-wrap:anywhere}.subject{overflow-wrap:anywhere;min-width:0}.word{display:inline-flex;position:relative;background:#cfeaf6;color:#234f63;border-radius:7px;padding:3px 7px;line-height:1.3;margin-bottom:10px}.translation{position:absolute;left:0;right:0;top:calc(100% + 2px);font-size:10px;color:#666;line-height:1;text-align:center;white-space:nowrap}.na{background:#fff1f5;color:#7a5964;border-radius:6px;padding:2px 6px;margin-bottom:10px}.composer{margin-top:10px;background:#fff;border:1px solid #9bcbe0;border-radius:14px;padding:12px}.guide{color:#666;font-size:14px;margin:0 0 10px}.photo-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}.upload-label{display:inline-block;background:#eef9fd;border:1px solid #9bcbe0;border-radius:8px;padding:8px 12px;cursor:pointer}.upload-label:focus-within{outline:2px solid #286b8a;outline-offset:2px}.file-input{position:absolute;width:1px;height:1px;opacity:0}.image-preview{display:block;max-width:100%;max-height:200px;object-fit:contain;border-radius:8px}.remove-photo{border:0;background:none;color:#666;padding:6px}.name-input{width:180px;max-width:60vw;border:2px solid #6db9dc;border-radius:8px;padding:5px 8px;font-size:16px;min-width:0}.primary{border:0;border-radius:8px;background:#286b8a;color:#fff;padding:9px 18px;font-weight:bold}.primary:disabled{opacity:.35;cursor:default}.table{border:2px solid;border-radius:12px;padding:8px;margin-top:10px}.adjective-table{background:#e8f6fc;border-color:#9bcbe0}.noun-table{background:#fff4df;border-color:#e8c98e}.note{font-size:12px;color:#666;margin:0 0 6px}.choices{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}.choice{min-height:43px;padding:5px 2px;border:1px solid #76a862;border-radius:7px;background:#eef9fd;color:#234f63}.choice.na-adjective{background:#f4cddd}.choice.selected{background:#6db9dc;border-color:#286b8a}.jp{display:block;font-size:14px;font-weight:600;line-height:1.2}.cn{display:block;font-size:10px;line-height:1.2;margin-top:3px;opacity:.8}.noun-table .choice{background:#fffaf0;border-color:#e8c98e;color:#6d552a}.noun-table .choice.selected{background:#e8c98e;border-color:#d9b66f}.modal{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:#0004}.name-box{width:min(340px,90vw);background:#fff;border-radius:16px;padding:22px;text-align:center}.name-box input{width:100%;padding:10px;border:1px solid #aaa;border-radius:8px;font-size:16px}.name-box button{margin-top:12px}.toast{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);max-width:calc(100vw - 32px);padding:12px 20px;border-radius:10px;background:#222;color:white;z-index:200;text-align:center;font-size:16px;pointer-events:none}.sync-status{font-size:12px;color:#777;min-height:18px;margin:6px 0 0}[hidden]{display:none!important}@media(max-width:600px){.app{padding-top:6px}.composer{padding:8px}.sentence{font-size:16px;gap:3px}.jp{font-size:13px}.feed{height:300px}.name-input{width:140px}.primary{padding:8px 12px}.choice{min-height:42px}}
+*{box-sizing:border-box}body{margin:0;background:#dff2fb;color:#292929;font-family:"Yu Kyokasho","BIZ UDPGothic","Noto Sans JP",sans-serif}.app{width:min(1050px,96vw);margin:auto;padding:12px 0 24px}button,input{font:inherit}button{cursor:pointer}.feed{height:330px;overflow-y:auto;background:#ffffffbf;border:1px solid #9bcbe0;border-radius:14px;padding:6px;display:flex;flex-direction:column;gap:8px}.empty{margin:auto;color:#888;font-size:14px}.post{background:#fff;border:1px solid #9bcbe0;border-left:4px solid #6db9dc;border-radius:10px;padding:10px;flex:none}.post-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;font-size:13px;color:#666}.post-image{display:block;max-width:100%;max-height:280px;object-fit:contain;border-radius:8px;margin-bottom:10px}.sentence{display:flex;flex-wrap:wrap;align-items:center;gap:5px;font-size:19px;line-height:1.7;margin:8px 0 16px;overflow-wrap:anywhere}.subject{overflow-wrap:anywhere;min-width:0}.word{display:inline-flex;position:relative;background:#cfeaf6;color:#234f63;border-radius:7px;padding:3px 7px;line-height:1.3;margin-bottom:10px}.translation{position:absolute;left:0;right:0;top:calc(100% + 2px);font-size:10px;color:#666;line-height:1;text-align:center;white-space:nowrap}.na{background:#fff1f5;color:#7a5964;border-radius:6px;padding:2px 6px;margin-bottom:10px}.composer{margin-top:10px;background:#fff;border:1px solid #9bcbe0;border-radius:14px;padding:12px}.guide{color:#666;font-size:14px;margin:0 0 10px}.photo-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}.upload-label{display:inline-block;background:#eef9fd;border:1px solid #9bcbe0;border-radius:8px;padding:8px 12px;cursor:pointer}.upload-label:focus-within{outline:2px solid #286b8a;outline-offset:2px}.file-input{position:absolute;width:1px;height:1px;opacity:0}.image-preview{display:block;max-width:100%;max-height:200px;object-fit:contain;border-radius:8px}.remove-photo{border:0;background:none;color:#666;padding:6px}.name-input{width:180px;max-width:60vw;border:2px solid #6db9dc;border-radius:8px;padding:5px 8px;font-size:16px;min-width:0}.primary{border:0;border-radius:8px;background:#286b8a;color:#fff;padding:9px 18px;font-weight:bold}.primary:disabled{opacity:.35;cursor:default}.table{border:2px solid;border-radius:12px;padding:8px;margin-top:10px}.adjective-table{background:#e8f6fc;border-color:#9bcbe0}.noun-table{background:#fff4df;border-color:#e8c98e}.note{font-size:12px;color:#666;margin:0 0 6px}.choices{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}.choice{min-height:43px;padding:5px 2px;border:1px solid #76a862;border-radius:7px;background:#eef9fd;color:#234f63}.choice.na-adjective{background:#f4cddd}.choice.selected{background:#6db9dc;border-color:#286b8a}.jp{display:block;font-size:14px;font-weight:600;line-height:1.2}.cn{display:block;font-size:10px;line-height:1.2;margin-top:3px;opacity:.8}.noun-table .choice{background:#fffaf0;border-color:#e8c98e;color:#6d552a}.noun-table .choice.selected{background:#e8c98e;border-color:#d9b66f}.modal{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:#0004}.name-box{width:min(340px,90vw);background:#fff;border-radius:16px;padding:22px;text-align:center}.name-box input{width:100%;padding:10px;border:1px solid #aaa;border-radius:8px;font-size:16px}.name-box button{margin-top:12px}.toast{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);max-width:calc(100vw - 32px);padding:12px 20px;border-radius:10px;background:#222;color:white;z-index:200;text-align:center;font-size:16px;pointer-events:none}.sync-status{font-size:12px;color:#777;min-height:18px;margin:6px 0 0}[hidden]{display:none!important}@media(max-width:600px){.app{padding-top:6px}.composer{padding:8px}.sentence{font-size:16px;gap:3px}.jp{font-size:13px}.feed{height:300px}.name-input{width:140px}.primary{padding:8px 12px}.choice{min-height:42px}}
 
+.post{display:grid;grid-template-columns:fit-content(72px) auto minmax(0,1fr);column-gap:8px;align-items:start}
+.post-header{grid-column:1;grid-row:1;flex-direction:column;align-items:flex-start;gap:6px;margin:0;max-width:72px;overflow-wrap:anywhere}
+.post-image{grid-column:2;grid-row:1;max-width:min(32vw,200px);margin:0}
+.post-text{grid-column:3;grid-row:1;min-width:0}
+.post-text .sentence{margin:0 0 12px}
+.post .reaction-row{grid-column:2 / -1;grid-row:2}
+.reaction-row{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:8px}
+.reaction-count{font-size:13px;color:#286b8a}
+.like-button{border:1px solid #9bcbe0;border-radius:9px;background:#eef9fd;color:#286b8a;padding:6px 10px;font-size:13px;font-weight:600}
+.like-button:disabled{cursor:default;background:#d8edf7;color:#617d8b}
 :root{--sentence-font:19px}
-.sentence{font-size:var(--sentence-font)}
+.sentence{font-size:var(--sentence-font);align-items:baseline;row-gap:12px;padding-bottom:12px}
+.word,.na{margin-bottom:0}
 .post-image,.image-preview{height:calc(var(--sentence-font) * 1.7 * 3);width:auto;max-width:100%;object-fit:contain}
 .feed.expanded{height:72vh}
 .feed-resizer{height:24px;margin:-1px 0 4px;position:relative;z-index:5}
@@ -44,7 +55,8 @@ const things=[["やま","山"],["かわ","河"],["うみ","海"],["おてら","�
 const $=id=>document.getElementById(id);
 const esc=value=>String(value??"").replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let userName=localStorage.getItem('weekend_user_name_v1')||'',selectedAdjs=[],selectedThing='',imageData='',imageVersion=0,imageBusy=false,posting=false;
-let posts=[],store,remote=null,syncing=false,toastTimer;
+let posts=[],store,remote=null,syncing=false,toastTimer,renderedContent;
+const reactionsInFlight=new Set();
 const DB_PATH='city2Image/posts';
 function setFeedExpanded(expanded){
  $('feed').classList.toggle('expanded',expanded);
@@ -62,14 +74,14 @@ function card(jp,cn){return `<span class="word"><span>${esc(jp)}</span><span cla
 function nounHtml(noun){
  return card(noun,(things.find(item=>item[0]===noun)||[])[1]||'');
 }
-function descriptionHtml(name,adjs,noun){
+function descriptionHtml(name,adjs,noun,preview=false){
  const adjective=adjectives.find(item=>item[0]===adjs[0]);
  const adjectiveHtml=adjective?card(adjective[0],adjective[1]):'';
  const na=adjective?.[2]&&noun?'<span class="na">な</span>':'';
- return `<span class="subject">${esc(name||'（名称）')}</span><span>は</span>${adjectiveHtml}${na}${noun?nounHtml(noun):''}<span>です。</span>`;
+ return `<span class="subject">${esc(name||'（名称）')}</span><span>は</span>${adjectiveHtml}${na}${noun?nounHtml(noun):''}${!preview||(adjective&&noun)?'<span>です。</span>':''}`;
 }
 function update(){
- $('descriptionPreview').innerHTML=descriptionHtml($('objectName').value.trim(),selectedAdjs,selectedThing);
+ $('descriptionPreview').innerHTML=descriptionHtml($('objectName').value.trim(),selectedAdjs,selectedThing,true);
  $('postBtn').disabled=posting||imageBusy||!imageData||!userName||!$('objectName').value.trim()||!selectedAdjs.length||!selectedThing||!store;
 }
 function renderChoices(){
@@ -92,21 +104,66 @@ function renderChoices(){
 function openStore(){return new Promise((resolve,reject)=>{const request=indexedDB.open('city2-image-posts-v1',1);request.onupgradeneeded=()=>request.result.createObjectStore('posts',{keyPath:'id'});request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error)})}
 function allRecords(){return new Promise((resolve,reject)=>{const tx=store.transaction('posts');const r=tx.objectStore('posts').getAll();tx.oncomplete=()=>resolve(r.result);tx.onerror=()=>reject(tx.error)})}
 function saveRecords(records){return new Promise((resolve,reject)=>{const tx=store.transaction('posts','readwrite');records.forEach(record=>tx.objectStore('posts').put(record));tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error)})}
+function mutateRecord(id,change){return new Promise((resolve,reject)=>{
+ const tx=store.transaction('posts','readwrite'),records=tx.objectStore('posts');let result;
+ const request=records.get(id);request.onsuccess=()=>{if(request.result){result=change(request.result);if(result)records.put(result)}};
+ tx.oncomplete=()=>resolve(result);tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error);
+})}
+function reactionKey(){return Array.from(new TextEncoder().encode(userName),byte=>byte.toString(16).padStart(2,'0')).join('')}
+function hasLiked(post){return userName!=='あさの'&&!!post.likes?.[reactionKey()]}
+function updateReaction(post){
+ const article=document.querySelector(`.post[data-id="${CSS.escape(post.id)}"]`);if(!article)return;
+ const count=Object.values(post.likes||{}).filter(Boolean).length;
+ article.querySelector('.reaction-count').textContent=count?'♥×'+count:'';
+ const button=article.querySelector('.like-button');button.disabled=!userName||hasLiked(post)||reactionsInFlight.has(post.id);
+ button.setAttribute('aria-pressed',String(hasLiked(post)));
+}
+async function reactToPost(id){
+ const post=posts.find(p=>p.id===id);if(!post||!userName||hasLiked(post)||reactionsInFlight.has(id))return;
+ reactionsInFlight.add(id);updateReaction(post);
+ try{
+  const key=userName==='あさの'?'admin_'+crypto.randomUUID():reactionKey();
+  const changed=await mutateRecord(id,current=>{
+   if(current.deleted)return current;
+   return {...current,likes:{...current.likes,[key]:true},pendingLikes:[...new Set([...(current.pendingLikes||[]),key])]};
+  });
+  if(changed){Object.assign(post,changed);updateReaction(post);void syncPending()}
+ }catch{notify('保存失败，请重试。')}
+ finally{reactionsInFlight.delete(id);updateReaction(post)}
+}
+async function deletePost(id){
+ if(userName!=='あさの'||!confirm('この投稿を削除しますか？'))return;
+ try{await mutateRecord(id,current=>({...current,deleted:true,pending:true}));await refresh();void syncPending()}catch{notify('保存失败，请重试。')}
+}
+function enableLongPress(article,id){
+ let timer,startX,startY;
+ const cancel=()=>{clearTimeout(timer);timer=null};
+ article.addEventListener('pointerdown',event=>{
+  cancel();if(userName!=='あさの'||event.button!==0||event.target.closest('button,a,input'))return;
+  startX=event.clientX;startY=event.clientY;timer=setTimeout(()=>{cancel();void deletePost(id)},750);
+ });
+ article.addEventListener('pointermove',event=>{if(Math.hypot(event.clientX-startX,event.clientY-startY)>10)cancel()});
+ for(const type of ['pointerup','pointerleave','pointercancel'])article.addEventListener(type,cancel);
+ article.addEventListener('contextmenu',event=>{if(userName==='あさの')event.preventDefault()});
+}
 async function refresh(){posts=(await allRecords()).filter(p=>!p.deleted).sort((a,b)=>a.createdAt-b.createdAt);renderPosts()}
 function renderPosts(){
+ const content=JSON.stringify([userName,posts.map(({likes,pendingLikes,pending,...post})=>post)]);
+ if(content===renderedContent){posts.forEach(updateReaction);return}
+ renderedContent=content;
  const feed=$('feed'),top=feed.scrollTop;feed.innerHTML='';
  if(!posts.length){feed.innerHTML='<div class="empty">まだ投稿がありません。</div>';return}
  for(const post of posts){
   const article=document.createElement('article');article.className='post';article.dataset.id=post.id;
   const header=document.createElement('div');header.className='post-header';const author=document.createElement('span');author.textContent=`（${post.author}）`;header.append(author);
-  if(post.author===userName){const button=document.createElement('button');button.type='button';button.className='delete';button.textContent='删除';button.onclick=async()=>{
-   if(!confirm('この投稿を削除しますか？'))return;
-   try{await saveRecords([{...post,deleted:true,pending:true}]);await refresh();void syncPending()}catch{notify('保存失败，请重试。')}
-  };header.append(button)}
   article.append(header);
-  if(typeof post.image==='string'&&/^data:image\/(jpeg|png|webp);base64,/.test(post.image)){const image=document.createElement('img');image.className='post-image';image.src=post.image;image.alt=post.name;image.loading='lazy';article.append(image)}
-  const intro=document.createElement('div');intro.className='sentence';intro.innerHTML=`<span>これは</span><span class="subject">${esc(post.name)}</span><span>です。</span>`;article.append(intro);
-  const description=document.createElement('div');description.className='sentence';description.innerHTML=descriptionHtml(post.name,post.adjs||[],post.thing);article.append(description);feed.append(article);
+  if(typeof post.image==='string'&&/^data:image\/(jpeg|png|webp);base64,/.test(post.image)){const image=document.createElement('img');image.className='post-image';image.draggable=false;image.src=post.image;image.alt=post.name;image.loading='lazy';article.append(image)}
+  const intro=document.createElement('div');intro.className='sentence';intro.innerHTML=`<span>これは</span><span class="subject">${esc(post.name)}</span><span>です。</span>`;const text=document.createElement('div');text.className='post-text';text.append(intro);
+  const description=document.createElement('div');description.className='sentence';description.innerHTML=descriptionHtml(post.name,post.adjs||[],post.thing);text.append(description);article.append(text);
+  const reactions=document.createElement('div');reactions.className='reaction-row';
+  const count=document.createElement('span');count.className='reaction-count';count.setAttribute('aria-live','polite');
+  const like=document.createElement('button');like.type='button';like.className='like-button';like.textContent='♥ いいですね！';like.onclick=()=>reactToPost(post.id);
+  reactions.append(count,like);article.append(reactions);enableLongPress(article,post.id);feed.append(article);updateReaction(post);
  }
  feed.scrollTop=top;
 }
@@ -115,10 +172,15 @@ async function syncPending(){
  syncing=true;
  try{
   for(const record of (await allRecords()).filter(p=>p.pending)){
-   const {pending,...data}=record;
+   const {pending,pendingLikes,...data}=record;
    await remote.set(remote.ref(remote.db,DB_PATH+'/'+record.id),data);
-   const current=(await allRecords()).find(p=>p.id===record.id);
-   if(current&&current.deleted===record.deleted)await saveRecords([{...current,pending:false}]);
+   await mutateRecord(record.id,current=>current.deleted===record.deleted?{...current,pending:false}:current);
+  }
+  for(const record of await allRecords()){
+   for(const key of record.pendingLikes||[]){
+    await remote.set(remote.ref(remote.db,DB_PATH+'/'+record.id+'/likes/'+key),true);
+    await mutateRecord(record.id,current=>({...current,pendingLikes:(current.pendingLikes||[]).filter(k=>k!==key)}));
+   }
   }
   $('syncStatus').textContent='已同步';
  }catch{$('syncStatus').textContent='已保存在此设备，联网后自动同步。'}finally{syncing=false}
@@ -130,7 +192,7 @@ async function initSync(){
   const config={apiKey:'AIzaSyCaLCM4TXURROKyDKD_Mga8ZnWr1-Wk9Wg',authDomain:'database-s-9e4b3.firebaseapp.com',databaseURL:'https://database-s-9e4b3-default-rtdb.asia-southeast1.firebasedatabase.app',projectId:'database-s-9e4b3',storageBucket:'database-s-9e4b3.firebasestorage.app',messagingSenderId:'13648984683',appId:'1:13648984683:web:c782d2963c253df69b8f2e'};
   remote={...D,db:D.getDatabase(A.initializeApp(config))};
   D.onValue(D.ref(remote.db,DB_PATH),async snapshot=>{
-   try{const local=await allRecords(),pending=new Set(local.filter(p=>p.pending).map(p=>p.id));const incoming=Object.values(snapshot.val()||{}).filter(p=>p&&typeof p.id==='string'&&!pending.has(p.id)).map(p=>({...p,pending:false}));await saveRecords(incoming);await refresh()}catch{$('syncStatus').textContent='同步失败，已保留本地投稿。'}
+   try{const local=await allRecords(),pending=new Set(local.filter(p=>p.pending).map(p=>p.id));const incoming=Object.values(snapshot.val()||{}).filter(p=>p&&typeof p.id==='string'&&!pending.has(p.id)).map(p=>{const current=local.find(item=>item.id===p.id),pendingLikes=current?.pendingLikes||[];return {...p,pending:false,pendingLikes,likes:{...p.likes,...Object.fromEntries(pendingLikes.map(key=>[key,true]))}}});await saveRecords(incoming);await refresh()}catch{$('syncStatus').textContent='同步失败，已保留本地投稿。'}
   },()=>{$('syncStatus').textContent='已保存在此设备，暂时无法同步。'});
   await syncPending();
  }catch{$('syncStatus').textContent='已保存在此设备，联网后自动同步。'}
