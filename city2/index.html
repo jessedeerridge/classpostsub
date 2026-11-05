@@ -164,6 +164,11 @@ function enableLongPress(article,id){
 }
 async function refresh(){posts=(await allRecords()).filter(p=>!p.deleted).sort((a,b)=>a.createdAt-b.createdAt);renderPosts()}
 function renderPosts(){
+ posts.sort((a,b)=>{
+  const ownA=a.author===userName,ownB=b.author===userName;
+  if(ownA!==ownB)return ownA?-1:1;
+  return ownA?b.createdAt-a.createdAt:a.createdAt-b.createdAt;
+ });
  const content=JSON.stringify([userName,posts.map(({likes,pendingLikes,pending,...post})=>post)]);
  if(content===renderedContent){posts.forEach(updateReaction);return}
  renderedContent=content;
@@ -293,7 +298,7 @@ $('postBtn').onclick=async()=>{
  if($('postBtn').disabled)return;
  posting=true;update();
  const record={id:crypto.randomUUID(),author:userName,name:$('objectName').value.trim(),adjs:[...selectedAdjs],thing:selectedThing,image:imageData,createdAt:Date.now(),pending:true,deleted:false};
- try{await saveRecords([record]);await refresh();$('objectName').value='';selectedAdjs=[];selectedThing='';clearImage();renderChoices();setFeedExpanded(true);$('feed').scrollTop=$('feed').scrollHeight;$('syncStatus').textContent='已保存在此设备。';void syncPending()}
+ try{await saveRecords([record]);await refresh();$('objectName').value='';selectedAdjs=[];selectedThing='';clearImage();renderChoices();setFeedExpanded(true);$('feed').scrollTop=0;$('syncStatus').textContent='已保存在此设备。';void syncPending()}
  catch{notify('保存失败，请重试。')}
  finally{posting=false;update()}
 };
