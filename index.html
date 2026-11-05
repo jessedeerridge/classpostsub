@@ -23,6 +23,10 @@
 .sentence{font-size:var(--sentence-font);align-items:baseline;row-gap:12px;padding-bottom:12px}
 .word,.na{margin-bottom:0}
 .post-image,.image-preview{height:calc(var(--sentence-font) * 1.7 * 3);width:auto;max-width:100%;object-fit:contain}
+.crop-preview{width:calc(var(--sentence-font) * 1.7 * 3);height:calc(var(--sentence-font) * 1.7 * 3);overflow:hidden;border-radius:8px;touch-action:none;cursor:grab;outline-offset:3px}
+.crop-preview.dragging{cursor:grabbing}
+.crop-preview .image-preview{width:100%;height:100%;max-height:none;max-width:none;object-fit:cover;border-radius:0;pointer-events:none;user-select:none}
+.crop-hint{font-size:12px;color:#666;margin:5px 0 8px}
 .feed.expanded{height:72vh}
 .feed-resizer{height:24px;margin:-1px 0 4px;position:relative;z-index:5}
 .feed-resizer button{display:block;width:38px;height:24px;margin:0 auto;padding:0;border:1px solid #9bcbe0;border-top:0;border-radius:0 0 10px 10px;background:#ffffffe6;color:#777;font-size:14px;line-height:22px;font-weight:bold;box-shadow:0 2px 4px #0001}
@@ -37,7 +41,8 @@
  <section class="composer" aria-label="投稿を作る">
   <p class="guide">上传图片，介绍一下吧。</p>
   <div class="photo-row"><label class="upload-label">从相册选择<input id="imageInput" class="file-input" type="file" accept=".jpg,.jpeg,.png,.webp,.gif,.heic,.heif"></label><span id="imageStatus" class="note" role="status">请选择图片</span><button id="removePhoto" class="remove-photo" type="button" hidden>移除图片</button></div>
-  <img id="imagePreview" class="image-preview" alt="投稿する画像" hidden>
+  <div id="cropPreview" class="crop-preview" tabindex="0" role="group" aria-label="画像をドラッグ、または矢印キーで切り取り位置を調整" aria-describedby="cropHint" hidden><img id="imagePreview" class="image-preview" alt="投稿する画像（正方形）" draggable="false" hidden></div>
+  <p id="cropHint" class="crop-hint" hidden>拖动图片调整位置</p>
   <div class="sentence"><span>これは</span><input id="objectName" class="name-input" placeholder="请输入名称" aria-label="紹介するものの名前" maxlength="60"><span>です。</span><button id="postBtn" class="primary" type="button" disabled>发布</button></div>
   <div id="descriptionPreview" class="sentence" aria-live="polite"></div>
   <div class="table adjective-table"><p class="note">请选择一个形容词</p><div id="adjArea" class="choices"></div></div>
@@ -59,6 +64,7 @@ const esc=value=>String(value??"").replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;
 let userName=localStorage.getItem('weekend_user_name_v1')||'',selectedAdjs=[],selectedThing='',imageData='',imageVersion=0,imageBusy=false,posting=false;
 let posts=[],store,remote=null,syncing=false,toastTimer,renderedContent;
 const reactionsInFlight=new Set();
+let cropState=null,cropDrag=null;
 const DB_PATH='city2Image/posts';
 function setFeedExpanded(expanded){
  $('feed').classList.toggle('expanded',expanded);
@@ -212,11 +218,61 @@ async function compressImage(file){
   if(data.length>1000000)throw Error('图片过大，请选择较小的图片。');return data;
  }finally{URL.revokeObjectURL(url)}
 }
-function clearImage(){imageVersion++;imageBusy=false;imageData='';$('imageInput').value='';$('imagePreview').hidden=true;$('imagePreview').removeAttribute('src');$('removePhoto').hidden=true;$('imageStatus').textContent='请选择图片';update()}
+function showCrop(){
+ if(!cropState)return;
+ const {image,side,x,y}=cropState;
+ const horizontal=image.naturalWidth-side,vertical=image.naturalHeight-side;
+ $('imagePreview').style.objectPosition=(horizontal?x/horizontal*100:50)+'% '+(vertical?y/vertical*100:50)+'%';
+}
+function commitCrop(){
+ if(!cropState)return;
+ const {image,side,x,y}=cropState,canvas=document.createElement('canvas');
+ canvas.width=canvas.height=Math.min(640,side);
+ const context=canvas.getContext('2d');context.fillStyle='#fff';context.fillRect(0,0,canvas.width,canvas.height);
+ context.drawImage(image,x,y,side,side,0,0,canvas.width,canvas.height);
+ imageData=canvas.toDataURL('image/jpeg',.8);
+}
+function clearImage(){
+ imageVersion++;imageBusy=false;imageData='';cropState=null;cropDrag=null;
+ $('cropPreview').classList.remove('dragging');$('cropPreview').hidden=true;$('cropHint').hidden=true;
+ $('imageInput').value='';$('imagePreview').hidden=true;$('imagePreview').removeAttribute('src');$('removePhoto').hidden=true;$('imageStatus').textContent='请选择图片';update();
+}
+$('cropPreview').addEventListener('pointerdown',event=>{
+ if(!cropState||imageBusy||cropDrag||event.button!==0)return;
+ event.preventDefault();
+ cropDrag={pointer:event.pointerId,clientX:event.clientX,clientY:event.clientY,x:cropState.x,y:cropState.y,ratio:cropState.side/$('cropPreview').getBoundingClientRect().width};
+ imageBusy=true;update();$('cropPreview').setPointerCapture(event.pointerId);$('cropPreview').classList.add('dragging');
+});
+$('cropPreview').addEventListener('pointermove',event=>{
+ if(!cropState||!cropDrag||event.pointerId!==cropDrag.pointer)return;
+ event.preventDefault();
+ cropState.x=Math.max(0,Math.min(cropState.image.naturalWidth-cropState.side,cropDrag.x-(event.clientX-cropDrag.clientX)*cropDrag.ratio));
+ cropState.y=Math.max(0,Math.min(cropState.image.naturalHeight-cropState.side,cropDrag.y-(event.clientY-cropDrag.clientY)*cropDrag.ratio));
+ showCrop();
+});
+function finishCrop(event){
+ if(!cropDrag||event.pointerId!==cropDrag.pointer)return;
+ cropDrag=null;commitCrop();imageBusy=false;update();$('cropPreview').classList.remove('dragging');
+ if($('cropPreview').hasPointerCapture(event.pointerId))$('cropPreview').releasePointerCapture(event.pointerId);
+}
+for(const event of ['pointerup','pointercancel','lostpointercapture'])$('cropPreview').addEventListener(event,finishCrop);
+$('cropPreview').addEventListener('keydown',event=>{
+ if(!cropState||imageBusy)return;
+ const direction={ArrowLeft:[1,0],ArrowRight:[-1,0],ArrowUp:[0,1],ArrowDown:[0,-1]}[event.key];if(!direction)return;
+ event.preventDefault();const step=cropState.side*.05;
+ cropState.x=Math.max(0,Math.min(cropState.image.naturalWidth-cropState.side,cropState.x+direction[0]*step));
+ cropState.y=Math.max(0,Math.min(cropState.image.naturalHeight-cropState.side,cropState.y+direction[1]*step));
+ showCrop();commitCrop();update();
+});
 $('imageInput').onchange=async()=>{
  const file=$('imageInput').files[0];if(!file)return;
  const version=++imageVersion;imageBusy=true;update();$('imageStatus').textContent='正在处理图片…';
- try{const data=await compressImage(file);if(version!==imageVersion)return;imageData=data;clearTimeout(toastTimer);$('toast').hidden=true;$('imagePreview').src=data;$('imagePreview').hidden=false;$('removePhoto').hidden=false;$('imageStatus').textContent='图片已选择'}
+ try{
+  const data=await compressImage(file),image=new Image();image.src=data;await image.decode();if(version!==imageVersion)return;
+  const side=Math.min(image.naturalWidth,image.naturalHeight);cropState={image,side,x:(image.naturalWidth-side)/2,y:(image.naturalHeight-side)/2};
+  $('imagePreview').src=data;$('imagePreview').hidden=false;$('cropPreview').hidden=false;$('cropHint').hidden=false;
+  showCrop();commitCrop();clearTimeout(toastTimer);$('toast').hidden=true;$('removePhoto').hidden=false;$('imageStatus').textContent='图片已选择';
+ }
  catch(error){if(version!==imageVersion)return;notify(error.message||'无法读取图片，请重试。');$('imageStatus').textContent=imageData?'图片已选择':'请选择图片'}
  finally{if(version===imageVersion){imageBusy=false;update()}}
 };
