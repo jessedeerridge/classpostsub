@@ -4447,7 +4447,7 @@ function preserveFeedPosition(feed){
  <div class="composer">
   <div id="composerGuide" class="guide">发布一下自己的家乡吧。</div>
   <div class="qa-grid">
-    <div class="q-cell q1">名前さんのまち は どちらですか。</div>
+    <div class="q-cell q1">名前さん の まち は どちらですか。</div>
     <div class="a-cell a1">
       <input id="shusshinInput" class="travel-destination-input shusshin-input" type="text"
              placeholder="用中文输入地名" autocomplete="off">
@@ -4672,7 +4672,7 @@ function townAdjHtml(adj, ending){
 }
 
 function updateComposer(){
- document.querySelector(".q1").textContent=(userName||"名前")+"さんのまち は どちらですか。";
+ document.querySelector(".q1").textContent=(userName||"名前")+"さん の まち は どちらですか。";
  const v=inputValue(), second=document.getElementById("shusshinSecond");
  const adjTable=document.getElementById("adjTable");
  if(adjTable) adjTable.style.display="block";
