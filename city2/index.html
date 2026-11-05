@@ -12,8 +12,10 @@
 .post-image{grid-column:1;grid-row:2;max-width:min(32vw,200px);margin:0}
 .post-text{grid-column:2;grid-row:2;min-width:0}
 .post-text .sentence{margin:0 0 12px}
+.post-text .sentence:last-child{margin-bottom:0;padding-bottom:0}
+.post-text .sentence:last-child .word{margin-bottom:10px}
 .post .reaction-row{grid-column:1 / -1;grid-row:3}
-.reaction-row{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:8px}
+.reaction-row{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:0}
 .reaction-count{font-size:13px;color:#286b8a}
 .like-button{border:1px solid #9bcbe0;border-radius:9px;background:#eef9fd;color:#286b8a;padding:6px 10px;font-size:13px;font-weight:600}
 .like-button:disabled{cursor:default;background:#d8edf7;color:#617d8b}
@@ -34,7 +36,7 @@
  <div class="feed-resizer"><button id="feedToggleBtn" type="button" title="投稿欄を広げる" aria-label="投稿欄を広げる" aria-controls="feed" aria-expanded="false">▼</button></div>
  <section class="composer" aria-label="投稿を作る">
   <p class="guide">上传图片，介绍一下吧。</p>
-  <div class="photo-row"><label class="upload-label">选择图片<input id="imageInput" class="file-input" type="file" accept="image/*"></label><span id="imageStatus" class="note" role="status">请选择图片</span><button id="removePhoto" class="remove-photo" type="button" hidden>移除图片</button></div>
+  <div class="photo-row"><label class="upload-label">从相册选择<input id="imageInput" class="file-input" type="file" accept=".jpg,.jpeg,.png,.webp,.gif,.heic,.heif"></label><span id="imageStatus" class="note" role="status">请选择图片</span><button id="removePhoto" class="remove-photo" type="button" hidden>移除图片</button></div>
   <img id="imagePreview" class="image-preview" alt="投稿する画像" hidden>
   <div class="sentence"><span>これは</span><input id="objectName" class="name-input" placeholder="请输入名称" aria-label="紹介するものの名前" maxlength="60"><span>です。</span><button id="postBtn" class="primary" type="button" disabled>发布</button></div>
   <div id="descriptionPreview" class="sentence" aria-live="polite"></div>
@@ -78,7 +80,7 @@ function descriptionHtml(name,adjs,noun,preview=false){
  const adjective=adjectives.find(item=>item[0]===adjs[0]);
  const adjectiveHtml=adjective?card(adjective[0],adjective[1]):'';
  const na=adjective?.[2]&&noun?'<span class="na">な</span>':'';
- return `<span class="subject">${esc(name||'（名称）')}</span><span>は</span>${adjectiveHtml}${na}${noun?nounHtml(noun):''}${!preview||(adjective&&noun)?'<span>です。</span>':''}`;
+ return `${name?`<span class="subject">${esc(name)}</span><span>は</span>`:''}${adjectiveHtml}${na}${noun?nounHtml(noun):''}${!preview||(adjective&&noun)?'<span>です。</span>':''}`;
 }
 function update(){
  $('descriptionPreview').innerHTML=descriptionHtml($('objectName').value.trim(),selectedAdjs,selectedThing,true);
