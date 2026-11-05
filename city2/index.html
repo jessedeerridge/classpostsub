@@ -4355,6 +4355,11 @@ padding:7px 10px;font:600 17px inherit;cursor:pointer;transition:.15s}
  font-size:16px !important;
  line-height:1.65 !important;
 }
+.origin-retry-popup.town-required{
+ background:#222;
+ color:#fff;
+ border-color:#222;
+}
 .origin-retry-popup.show{
  display:flex !important;
  animation:originRetryCenterIn .16s ease-out !important;
@@ -4670,7 +4675,7 @@ function updateComposer(){
  document.querySelector(".q1").textContent=(userName||"名前")+"さんのまち は どちらですか。";
  const v=inputValue(), second=document.getElementById("shusshinSecond");
  const adjTable=document.getElementById("adjTable");
- if(adjTable) adjTable.style.display=v?"block":"none";
+ if(adjTable) adjTable.style.display="block";
  if(!v && (selectedAdjs.length || selectedThing)){
    selectedAdjs=[];
    selectedThing="";
@@ -4688,7 +4693,7 @@ const a2Cell=document.getElementById("shusshinSubjectAnswer").parentElement;
  document.getElementById("shusshinSubjectAnswer").textContent=v;
  const showThird=!!(v&&(selectedAdjs.length || selectedThing));
  const thingTable=document.getElementById("thingTable");
- if(thingTable) thingTable.style.display=showThird?"block":"none";
+ if(thingTable) thingTable.style.display="block";
  document.getElementById("q3Cell").style.display=showThird?"block":"none";
  document.getElementById("shusshinSubject3").textContent=v;
  document.getElementById("shusshinSubjectAnswer3").textContent=v;
@@ -4710,7 +4715,7 @@ const a2Cell=document.getElementById("shusshinSubjectAnswer").parentElement;
  const nameAdjTable=document.getElementById("nameAdjTable");
  const a5Cell=document.getElementById("a5Cell");
  const q5Cell=document.getElementById("q5Cell");
- if(nameAdjTable){ nameAdjTable.hidden=!selectedThing; nameAdjTable.style.display=selectedThing ? "block" : "none"; nameAdjTable.classList.toggle("third-visible",!!selectedThing); }
+ if(nameAdjTable){ nameAdjTable.hidden=false; nameAdjTable.style.display="block"; nameAdjTable.classList.add("third-visible"); }
  if(q5Cell) q5Cell.hidden=true;
  if(a5Cell){ a5Cell.hidden=!selectedThing; a5Cell.style.display=selectedThing ? "flex" : "none"; }
  const ns=document.getElementById("thingNameSubject");
@@ -5470,14 +5475,30 @@ if(_thingNameInput && _dontKnowNameBtn){
  if(!input||!pop||!text)return;
 
  let timer=null;
- function show(msg){
+ function show(msg,townRequired=false){
    clearTimeout(timer);
+   pop.classList.toggle("town-required",townRequired);
    text.innerHTML=msg;
    pop.classList.remove("show");
    void pop.offsetWidth;
    pop.classList.add("show");
    timer=setTimeout(()=>pop.classList.remove("show"),2200);
  }
+
+ document.addEventListener("click",e=>{
+   const button=e.target.closest("#adjArea .choice, #thingArea .choice, #nameAdjArea .choice, #dontKnowNameBtn");
+   if(!button || input.value.trim())return;
+   e.preventDefault();
+   e.stopImmediatePropagation();
+   show("请输入城镇名称",true);
+   input.focus({preventScroll:true});
+ },true);
+ input.addEventListener("input",()=>{
+   if(input.value.trim() && pop.classList.contains("town-required")){
+     clearTimeout(timer);
+     pop.classList.remove("show");
+   }
+ });
 
  function validate(){
    const v=input.value.trim();
