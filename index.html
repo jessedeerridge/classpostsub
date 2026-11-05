@@ -65,7 +65,7 @@ let userName=localStorage.getItem('weekend_user_name_v1')||'',selectedAdjs=[],se
 let posts=[],store,remote=null,syncing=false,toastTimer,renderedContent;
 const reactionsInFlight=new Set();
 let cropState=null,cropDrag=null;
-const DB_PATH='city2Image/posts';
+const DB_PATH='buidings/posts';
 function setFeedExpanded(expanded){
  $('feed').classList.toggle('expanded',expanded);
  const button=$('feedToggleBtn');
@@ -117,6 +117,11 @@ function mutateRecord(id,change){return new Promise((resolve,reject)=>{
  const request=records.get(id);request.onsuccess=()=>{if(request.result){result=change(request.result);if(result)records.put(result)}};
  tx.oncomplete=()=>resolve(result);tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error);
 })}
+async function prepareSyncNamespace(){
+ if(localStorage.getItem('city2_image_sync_path')===DB_PATH)return;
+ const records=await allRecords();await saveRecords(records.map(record=>({...record,pending:true})));
+ localStorage.setItem('city2_image_sync_path',DB_PATH);
+}
 function reactionKey(){return Array.from(new TextEncoder().encode(userName),byte=>byte.toString(16).padStart(2,'0')).join('')}
 function hasLiked(post){return userName!=='あさの'&&!!post.likes?.[reactionKey()]}
 function updateReaction(post){
@@ -290,7 +295,7 @@ $('postBtn').onclick=async()=>{
 };
 window.addEventListener('online',syncPending);setInterval(syncPending,10000);
 renderChoices();update();
-(async()=>{try{store=await openStore();await refresh();if(posts.length)setFeedExpanded(true);update();void initSync()}catch{$('syncStatus').textContent='无法保存投稿，请允许浏览器使用本地存储。'}})();
+(async()=>{try{store=await openStore();await prepareSyncNamespace();await refresh();if(posts.length)setFeedExpanded(true);update();void initSync()}catch{$('syncStatus').textContent='无法保存投稿，请允许浏览器使用本地存储。'}})();
 </script>
 </body>
 </html>

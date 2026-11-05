@@ -1,0 +1,33 @@
+{
+  "rules": {
+    ".read": true,
+    ".write": false,
+    "asa": {
+      ".write": true
+    },
+    "bestProgress": {
+      ".write": true
+    },
+    "progress": {
+      ".write": true
+    },
+    "students": {
+      ".write": true
+    },
+    "kanaProgress": {
+      ".write": "auth != null"
+    },
+    "shokuzaiSentence": {
+      ".write": true
+    },
+    "weekendSentence": {
+      ".write": true
+    },
+    "shusshinSentence": {
+      ".write": true
+    },
+    "buidings": {
+      ".write": true
+    }
+  }
+}
