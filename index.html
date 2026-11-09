@@ -35,6 +35,10 @@
 .feed-resizer{height:24px;margin:-1px 0 4px;position:relative;z-index:5}
 .feed-resizer button{display:block;width:38px;height:24px;margin:0 auto;padding:0;border:1px solid #9bcbe0;border-top:0;border-radius:0 0 10px 10px;background:#ffffffe6;color:#777;font-size:14px;line-height:22px;font-weight:bold;box-shadow:0 2px 4px #0001}
 @media(max-width:600px){:root{--sentence-font:16px}}
+.post-image{cursor:zoom-in}
+.photo-viewer{position:fixed;inset:0;z-index:300;width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;padding:16px;border:0;background:#000d;cursor:zoom-out;overflow:hidden}
+.photo-viewer[open]{display:flex;align-items:center;justify-content:center}
+.photo-viewer img{display:block;max-width:100%;max-height:100%;object-fit:contain}
 </style>
 </head>
 <body>
@@ -55,6 +59,7 @@
  </section>
 </main>
 <div id="toast" class="toast" role="alert" hidden></div>
+<dialog id="photoViewer" class="photo-viewer" aria-label="拡大した写真。クリックで閉じる" tabindex="-1"><img id="enlargedPhoto" alt=""></dialog>
 <script>
 const adjectives=[
  ["おおきい","大",false],["ちいさい","小",false],
@@ -64,6 +69,15 @@ const adjectives=[
 ];
 const things=[["やま","山"],["かわ","河"],["うみ","海"],["おてら","寺庙"],["こうえん","公园"],["たてもの","建筑"],["ところ","地方"],["ゆうえんち","游乐园"],["すいぞくかん","水族馆"]];
 const $=id=>document.getElementById(id);
+const photoViewer=$('photoViewer');
+let photoTrigger=null;
+function closePhoto(){photoViewer.close();$('enlargedPhoto').removeAttribute('src');if(photoTrigger?.isConnected)photoTrigger.focus();photoTrigger=null}
+photoViewer.addEventListener('click',closePhoto);
+photoViewer.addEventListener('cancel',event=>{event.preventDefault();closePhoto()});
+function enlargePhoto(image){
+ photoTrigger=image;$('enlargedPhoto').src=image.src;$('enlargedPhoto').alt=image.alt;
+ photoViewer.showModal();photoViewer.focus();
+}
 const esc=value=>String(value??"").replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let userName=localStorage.getItem('weekend_user_name_v1')||'',selectedAdjs=[],selectedThing='',imageData='',imageVersion=0,imageBusy=false,posting=false;
 let posts=[],store,remote=null,syncing=false,toastTimer,renderedContent;
@@ -156,7 +170,7 @@ function enableLongPress(article,id){
  let timer,startX,startY;
  const cancel=()=>{clearTimeout(timer);timer=null};
  article.addEventListener('pointerdown',event=>{
-  cancel();if(userName!=='あさの'||event.button!==0||event.target.closest('button,a,input'))return;
+  cancel();if(userName!=='あさの'||event.button!==0||event.target.closest('button,a,input,.post-image'))return;
   startX=event.clientX;startY=event.clientY;timer=setTimeout(()=>{cancel();void deletePost(id)},750);
  });
  article.addEventListener('pointermove',event=>{if(Math.hypot(event.clientX-startX,event.clientY-startY)>10)cancel()});
@@ -179,7 +193,7 @@ function renderPosts(){
   const article=document.createElement('article');article.className='post';article.dataset.id=post.id;
   const header=document.createElement('div');header.className='post-header';const author=document.createElement('span');author.textContent=`（${post.author}）`;header.append(author);
   article.append(header);
-  if(typeof post.image==='string'&&/^data:image\/(jpeg|png|webp);base64,/.test(post.image)){const image=document.createElement('img');image.className='post-image';image.draggable=false;image.src=post.image;image.alt=post.name;image.loading='lazy';article.append(image)}
+  if(typeof post.image==='string'&&/^data:image\/(jpeg|png|webp);base64,/.test(post.image)){const image=document.createElement('img');image.className='post-image';image.draggable=false;image.src=post.image;image.alt=post.name;image.loading='lazy';image.tabIndex=0;image.setAttribute('role','button');image.setAttribute('aria-label',post.name+'の写真を拡大');image.onclick=()=>enlargePhoto(image);image.onkeydown=event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();enlargePhoto(image)}};article.append(image)}
   const intro=document.createElement('div');intro.className='sentence';intro.innerHTML=`<span>これは</span><span class="subject">${esc(post.name)}</span><span>です。</span>`;const text=document.createElement('div');text.className='post-text';text.append(intro);
   const description=document.createElement('div');description.className='sentence';description.innerHTML=descriptionHtml(post.name,post.adjs||[],post.thing);text.append(description);article.append(text);
   const reactions=document.createElement('div');reactions.className='reaction-row';
