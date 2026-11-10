@@ -1,325 +1,38 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>これは なんですか。</title>
-<style>
-*{box-sizing:border-box}body{margin:0;background:#dff2fb;color:#292929;font-family:"Yu Kyokasho","BIZ UDPGothic","Noto Sans JP",sans-serif}.app{width:min(1050px,96vw);margin:auto;padding:12px 0 24px}button,input{font:inherit}button{cursor:pointer}.feed{height:330px;overflow-y:auto;background:#ffffffbf;border:1px solid #9bcbe0;border-radius:14px;padding:6px;display:flex;flex-direction:column;gap:8px}.empty{margin:auto;color:#888;font-size:14px}.post{background:#fff;border:1px solid #9bcbe0;border-left:4px solid #6db9dc;border-radius:10px;padding:10px;flex:none}.post-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;font-size:13px;color:#666}.post-image{display:block;max-width:100%;max-height:280px;object-fit:contain;border-radius:8px;margin-bottom:10px}.sentence{display:flex;flex-wrap:wrap;align-items:center;gap:5px;font-size:19px;line-height:1.7;margin:8px 0 16px;overflow-wrap:anywhere}.subject{overflow-wrap:anywhere;min-width:0}.word{display:inline-flex;position:relative;background:#cfeaf6;color:#234f63;border-radius:7px;padding:3px 7px;line-height:1.3;margin-bottom:10px}.translation{position:absolute;left:0;right:0;top:calc(100% + 2px);font-size:10px;color:#666;line-height:1;text-align:center;white-space:nowrap}.na{background:#fff1f5;color:#7a5964;border-radius:6px;padding:2px 6px;margin-bottom:10px}.composer{margin-top:10px;background:#fff;border:1px solid #9bcbe0;border-radius:14px;padding:12px}.guide{color:#666;font-size:14px;margin:0 0 10px}.photo-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}.upload-label{display:inline-block;background:#eef9fd;border:1px solid #9bcbe0;border-radius:8px;padding:8px 12px;cursor:pointer}.upload-label:focus-within{outline:2px solid #286b8a;outline-offset:2px}.file-input{position:absolute;width:1px;height:1px;opacity:0}.image-preview{display:block;max-width:100%;max-height:200px;object-fit:contain;border-radius:8px}.remove-photo{border:0;background:none;color:#666;padding:6px}.name-input{width:180px;max-width:60vw;border:2px solid #6db9dc;border-radius:8px;padding:5px 8px;font-size:16px;min-width:0}.primary{border:0;border-radius:8px;background:#286b8a;color:#fff;padding:9px 18px;font-weight:bold}.primary:disabled{opacity:.35;cursor:default}.table{border:2px solid;border-radius:12px;padding:8px;margin-top:10px}.adjective-table{background:#e8f6fc;border-color:#9bcbe0}.noun-table{background:#fff4df;border-color:#e8c98e}.note{font-size:12px;color:#666;margin:0 0 6px}.choices{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}.choice{min-height:43px;padding:5px 2px;border:1px solid #76a862;border-radius:7px;background:#eef9fd;color:#234f63}.choice.na-adjective{background:#f4cddd}.choice.selected{background:#6db9dc;border-color:#286b8a}.jp{display:block;font-size:14px;font-weight:600;line-height:1.2}.cn{display:block;font-size:10px;line-height:1.2;margin-top:3px;opacity:.8}.noun-table .choice{background:#fffaf0;border-color:#e8c98e;color:#6d552a}.noun-table .choice.selected{background:#e8c98e;border-color:#d9b66f}.modal{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:#0004}.name-box{width:min(340px,90vw);background:#fff;border-radius:16px;padding:22px;text-align:center}.name-box input{width:100%;padding:10px;border:1px solid #aaa;border-radius:8px;font-size:16px}.name-box button{margin-top:12px}.toast{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);max-width:calc(100vw - 32px);padding:12px 20px;border-radius:10px;background:#222;color:white;z-index:200;text-align:center;font-size:16px;pointer-events:none}.sync-status{font-size:12px;color:#777;min-height:18px;margin:6px 0 0}[hidden]{display:none!important}@media(max-width:600px){.app{padding-top:6px}.composer{padding:8px}.sentence{font-size:16px;gap:3px}.jp{font-size:13px}.feed{height:300px}.name-input{width:140px}.primary{padding:8px 12px}.choice{min-height:42px}}
-
-.post{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:8px;align-items:start}
-.post-header{grid-column:1;grid-row:1;align-items:center;align-self:center;margin:0 0 6px;overflow-wrap:anywhere}
-.post-image{grid-column:1 / -1;grid-row:2;justify-self:start;max-width:100%;height:calc(var(--sentence-font) * 1.7 * 3.6);margin:0 0 8px}
-.post-text{grid-column:1 / -1;grid-row:3;min-width:0}
-.post-text .sentence{margin:0 0 4px;padding-bottom:0;line-height:1.4;row-gap:2px}
-.post-text .sentence:last-child{margin-bottom:0;padding-bottom:0}
-.post-text .word{margin-bottom:12px}
-.post .reaction-row{grid-column:2;grid-row:1;align-self:start;margin-bottom:6px}
-.reaction-row{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:0}
-.reaction-count{font-size:13px;color:#286b8a}
-.like-button{border:1px solid #9bcbe0;border-radius:9px;background:#eef9fd;color:#286b8a;padding:6px 10px;font-size:13px;font-weight:600}
-.like-button:disabled{cursor:default;background:#d8edf7;color:#617d8b}
-:root{--sentence-font:19px}
-.sentence{font-size:var(--sentence-font);align-items:baseline;row-gap:12px;padding-bottom:12px}
-.word,.na{margin-bottom:0}
-.post-image,.image-preview{width:auto;max-width:100%;object-fit:contain}
-.image-preview{height:calc(var(--sentence-font) * 1.7 * 3)}
- .photo-button{min-width:112px;padding:8px 12px;border:1px solid #9bcbe0;border-radius:8px;background:#eef9fd;color:#234f63}
-.photo-button:disabled{opacity:.45;cursor:default}
-.image-status{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
-.crop-preview{width:calc(var(--sentence-font) * 1.7 * 3);height:calc(var(--sentence-font) * 1.7 * 3);overflow:hidden;border-radius:8px;touch-action:none;cursor:grab;outline-offset:3px}
-.crop-preview.dragging{cursor:grabbing}
-.crop-preview .image-preview{width:100%;height:100%;max-height:none;max-width:none;object-fit:cover;border-radius:0;pointer-events:none;user-select:none}
-.crop-hint{font-size:12px;color:#666;margin:5px 0 8px}
-.feed.expanded{height:72vh}
-.feed-resizer{height:24px;margin:-1px 0 4px;position:relative;z-index:5}
-.feed-resizer button{display:block;width:38px;height:24px;margin:0 auto;padding:0;border:1px solid #9bcbe0;border-top:0;border-radius:0 0 10px 10px;background:#ffffffe6;color:#777;font-size:14px;line-height:22px;font-weight:bold;box-shadow:0 2px 4px #0001}
-@media(max-width:600px){:root{--sentence-font:16px}}
-.post-image{cursor:zoom-in}
-.photo-viewer{position:fixed;inset:0;z-index:300;width:100vw;height:100dvh;max-width:none;max-height:none;margin:0;padding:16px;border:0;background:#000d;cursor:zoom-out;overflow:hidden}
-.photo-viewer[open]{display:flex;align-items:center;justify-content:center}
-.photo-viewer img{display:block;max-width:100%;max-height:100%;object-fit:contain}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f1e8">
+  <title>ito · 数字をひく</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100svh; background: #f4f1e8; color: #263b32; font-family: system-ui, sans-serif; }
+    main { width: min(100% - 40px, 440px); margin: auto; padding: 40px 0 28px; text-align: center; }
+    header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 28px; }
+    h1 { font-size: 32px; letter-spacing: .08em; margin: 0; }
+    #remaining { font-size: 13px; color: #56685e; }
+    .label { font-size: 14px; margin-bottom: 16px; }
+    .card { width: min(100%, 280px); aspect-ratio: 3 / 4; margin: auto; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #fffdf7; border: 1px solid #d4d9c9; border-radius: 24px; box-shadow: 0 12px 30px #263b3210; }
+    #number { font-size: clamp(80px, 23vw, 112px); line-height: 1.3; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .range { color: #78816c; letter-spacing: .2em; font-size: 12px; }
+    #status { min-height: 3.5em; margin: 24px 0 16px; font-size: 14px; line-height: 1.8; overflow-wrap: anywhere; }
+    button { width: 100%; min-height: 56px; background: #294f40; color: white; border: none; border-radius: 14px; font: inherit; font-weight: 700; cursor: pointer; }
+    button:hover:not(:disabled) { background: #1b3b2d; }
+    button:disabled { opacity: .5; cursor: default; }
+    button:focus-visible { outline: 3px solid #a77027; outline-offset: 4px; }
+    footer { color: #56685e; font-size: 12px; line-height: 1.9; margin-top: 24px; }
+  </style>
 </head>
 <body>
-<div id="nameModal" class="modal"><form id="nameForm" class="name-box"><input id="nameInput" placeholder="请输入姓名" aria-label="姓名" maxlength="20" required><button class="primary" type="submit">确定</button></form></div>
-<main class="app">
- <div id="feed" class="feed" aria-label="投稿"><div class="empty">まだ投稿がありません。</div></div>
- <div class="feed-resizer"><button id="feedToggleBtn" type="button" title="投稿欄を広げる" aria-label="投稿欄を広げる" aria-controls="feed" aria-expanded="false">▼</button></div>
- <section class="composer" aria-label="投稿を作る">
-  <p class="guide">上传图片，介绍一下吧。</p>
-  <div class="photo-row"><button id="addPhoto" class="photo-button" type="button">添加图片</button><button id="removePhoto" class="photo-button" type="button" disabled>删除图片</button><input id="imageInput" type="file" accept=".jpg,.jpeg,.png,.webp,.gif,.heic,.heif" hidden><span id="imageStatus" class="image-status" role="status">请选择图片</span></div>
-  <div id="cropPreview" class="crop-preview" tabindex="0" role="group" aria-label="画像をドラッグ、または矢印キーで切り取り位置を調整" aria-describedby="cropHint" hidden><img id="imagePreview" class="image-preview" alt="投稿する画像（正方形）" draggable="false" hidden></div>
-  <p id="cropHint" class="crop-hint" hidden>拖动图片调整位置</p>
-  <div class="sentence"><span>これは</span><input id="objectName" class="name-input" placeholder="请输入名称" aria-label="紹介するものの名前" maxlength="60"><span>です。</span><button id="postBtn" class="primary" type="button" disabled>发布</button></div>
-  <div id="descriptionPreview" class="sentence" aria-live="polite"></div>
-  <div class="table adjective-table"><p class="note">请选择一个形容词</p><div id="adjArea" class="choices"></div></div>
-  <div class="table noun-table"><div id="thingArea" class="choices"></div></div>
-  <p id="syncStatus" class="sync-status" hidden></p>
- </section>
-</main>
-<div id="toast" class="toast" role="alert" hidden></div>
-<dialog id="photoViewer" class="photo-viewer" aria-label="拡大した写真。クリックで閉じる" tabindex="-1"><img id="enlargedPhoto" alt=""></dialog>
-<script>
-const adjectives=[
- ["おおきい","大",false],["ちいさい","小",false],
- ["みどりが おおい","绿化多",false],["ひとが おおい","人多",false],["いい","好",false],
- ["たかい","高",false],["ながい","长",false],["あたらしい","新",false],["ふるい","旧",false],["たのしい","玩得开心",false],["おもしろい","有趣",false],
- ["しずか","安静",true],["にぎやか","热闹",true],["きれい","漂亮",true],["ゆうめい","有名",true]
-];
-const things=[["やま","山"],["かわ","河"],["うみ","海"],["おてら","寺庙"],["こうえん","公园"],["たてもの","建筑"],["ところ","地方"],["ゆうえんち","游乐园"],["すいぞくかん","水族馆"]];
-const $=id=>document.getElementById(id);
-const photoViewer=$('photoViewer');
-let photoTrigger=null;
-function closePhoto(){photoViewer.close();$('enlargedPhoto').removeAttribute('src');if(photoTrigger?.isConnected)photoTrigger.focus();photoTrigger=null}
-photoViewer.addEventListener('click',closePhoto);
-photoViewer.addEventListener('cancel',event=>{event.preventDefault();closePhoto()});
-function enlargePhoto(image){
- photoTrigger=image;$('enlargedPhoto').src=image.src;$('enlargedPhoto').alt=image.alt;
- photoViewer.showModal();photoViewer.focus();
-}
-const esc=value=>String(value??"").replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let userName=localStorage.getItem('weekend_user_name_v1')||'',selectedAdjs=[],selectedThing='',imageData='',imageVersion=0,imageBusy=false,posting=false;
-let posts=[],store,remote=null,syncing=false,toastTimer,renderedContent;
-const reactionsInFlight=new Set();
-let cropState=null,cropDrag=null;
-const DB_PATH='buidings/posts';
-function setFeedExpanded(expanded){
- $('feed').classList.toggle('expanded',expanded);
- const button=$('feedToggleBtn');
- button.textContent=expanded?'▲':'▼';
- button.title=expanded?'投稿欄を元に戻す':'投稿欄を広げる';
- button.setAttribute('aria-label',button.title);
- button.setAttribute('aria-expanded',String(expanded));
-}
-$('feedToggleBtn').onclick=()=>setFeedExpanded(!$('feed').classList.contains('expanded'));
-$('objectName').addEventListener('focus',()=>setFeedExpanded(false));
-
-function notify(message){clearTimeout(toastTimer);$('toast').textContent=message;$('toast').hidden=false;toastTimer=setTimeout(()=>$('toast').hidden=true,2200)}
-function card(jp,cn){return `<span class="word"><span>${esc(jp)}</span><span class="translation">${esc(cn)}</span></span>`}
-function nounHtml(noun){
- return card(noun,(things.find(item=>item[0]===noun)||[])[1]||'');
-}
-function descriptionHtml(name,adjs,noun,preview=false){
- const adjective=adjectives.find(item=>item[0]===adjs[0]);
- const adjectiveHtml=adjective?card(adjective[0],adjective[1]):'';
- const na=adjective?.[2]&&noun?'<span class="na">な</span>':'';
- return `${name?`<span class="subject">${esc(name)}</span><span>は</span>`:''}${adjectiveHtml}${na}${noun?nounHtml(noun):''}${!preview||(adjective&&noun)?'<span>です。</span>':''}`;
-}
-function update(){
- $('descriptionPreview').innerHTML=descriptionHtml($('objectName').value.trim(),selectedAdjs,selectedThing,true);
- $('postBtn').disabled=posting||imageBusy||!imageData||!userName||!$('objectName').value.trim()||!selectedAdjs.length||!selectedThing||!store;
-}
-function renderChoices(){
- $('adjArea').innerHTML='';
- adjectives.forEach(([jp,cn,na])=>{
-  const button=document.createElement('button');button.type='button';button.className='choice'+(na?' na-adjective':'')+(selectedAdjs.includes(jp)?' selected':'');
-  button.setAttribute('aria-pressed',String(selectedAdjs.includes(jp)));button.innerHTML=`<span class="jp">${esc(jp).replace("が おおい","が<br>おおい")}</span><span class="cn">${esc(cn)}</span>`;
-  button.onclick=()=>{
-   selectedAdjs=selectedAdjs.includes(jp)?[]:[jp];
-   renderChoices();update();
-  };$('adjArea').append(button);
- });
- $('thingArea').innerHTML='';
- things.forEach(([jp,cn])=>{
-  const button=document.createElement('button');button.type='button';button.className='choice'+(selectedThing===jp?' selected':'');button.setAttribute('aria-pressed',String(selectedThing===jp));
-  button.innerHTML=`<span class="jp">${esc(jp)}</span><span class="cn">${esc(cn)}</span>`;
-  button.onclick=()=>{selectedThing=selectedThing===jp?'':jp;renderChoices();update()};$('thingArea').append(button);
- });
-}
-function openStore(){return new Promise((resolve,reject)=>{const request=indexedDB.open('city2-image-posts-v1',1);request.onupgradeneeded=()=>request.result.createObjectStore('posts',{keyPath:'id'});request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error)})}
-function allRecords(){return new Promise((resolve,reject)=>{const tx=store.transaction('posts');const r=tx.objectStore('posts').getAll();tx.oncomplete=()=>resolve(r.result);tx.onerror=()=>reject(tx.error)})}
-function saveRecords(records){return new Promise((resolve,reject)=>{const tx=store.transaction('posts','readwrite');records.forEach(record=>tx.objectStore('posts').put(record));tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error)})}
-function mutateRecord(id,change){return new Promise((resolve,reject)=>{
- const tx=store.transaction('posts','readwrite'),records=tx.objectStore('posts');let result;
- const request=records.get(id);request.onsuccess=()=>{if(request.result){result=change(request.result);if(result)records.put(result)}};
- tx.oncomplete=()=>resolve(result);tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error);
-})}
-async function prepareSyncNamespace(){
- if(localStorage.getItem('city2_image_sync_path')===DB_PATH)return;
- const records=await allRecords();await saveRecords(records.map(record=>({...record,pending:true})));
- localStorage.setItem('city2_image_sync_path',DB_PATH);
-}
-function reactionKey(){return Array.from(new TextEncoder().encode(userName),byte=>byte.toString(16).padStart(2,'0')).join('')}
-function hasLiked(post){return userName!=='あさの'&&!!post.likes?.[reactionKey()]}
-function updateReaction(post){
- const article=document.querySelector(`.post[data-id="${CSS.escape(post.id)}"]`);if(!article)return;
- const count=Object.values(post.likes||{}).filter(Boolean).length;
- article.querySelector('.reaction-count').textContent=count?'♥×'+count:'';
- const button=article.querySelector('.like-button');button.disabled=!userName||hasLiked(post)||reactionsInFlight.has(post.id);
- button.setAttribute('aria-pressed',String(hasLiked(post)));
-}
-async function reactToPost(id){
- const post=posts.find(p=>p.id===id);if(!post||!userName||hasLiked(post)||reactionsInFlight.has(id))return;
- reactionsInFlight.add(id);updateReaction(post);
- try{
-  const key=userName==='あさの'?'admin_'+crypto.randomUUID():reactionKey();
-  const changed=await mutateRecord(id,current=>{
-   if(current.deleted)return current;
-   return {...current,likes:{...current.likes,[key]:true},pendingLikes:[...new Set([...(current.pendingLikes||[]),key])]};
-  });
-  if(changed){Object.assign(post,changed);updateReaction(post);void syncPending()}
- }catch{notify('保存失败，请重试。')}
- finally{reactionsInFlight.delete(id);updateReaction(post)}
-}
-async function deletePost(id){
- if(userName!=='あさの'||!confirm('この投稿を削除しますか？'))return;
- try{await mutateRecord(id,current=>({...current,deleted:true,pending:true}));await refresh();void syncPending()}catch{notify('保存失败，请重试。')}
-}
-function enableLongPress(article,id){
- let timer,startX,startY;
- const cancel=()=>{clearTimeout(timer);timer=null};
- article.addEventListener('pointerdown',event=>{
-  cancel();if(userName!=='あさの'||event.button!==0||event.target.closest('button,a,input,.post-image'))return;
-  startX=event.clientX;startY=event.clientY;timer=setTimeout(()=>{cancel();void deletePost(id)},750);
- });
- article.addEventListener('pointermove',event=>{if(Math.hypot(event.clientX-startX,event.clientY-startY)>10)cancel()});
- for(const type of ['pointerup','pointerleave','pointercancel'])article.addEventListener(type,cancel);
- article.addEventListener('contextmenu',event=>{if(userName==='あさの')event.preventDefault()});
-}
-async function refresh(){posts=(await allRecords()).filter(p=>!p.deleted).sort((a,b)=>a.createdAt-b.createdAt);renderPosts()}
-function renderPosts(){
- posts.sort((a,b)=>{
-  const ownA=a.author===userName,ownB=b.author===userName;
-  if(ownA!==ownB)return ownA?-1:1;
-  return ownA?b.createdAt-a.createdAt:a.createdAt-b.createdAt;
- });
- const content=JSON.stringify([userName,posts.map(({likes,pendingLikes,pending,...post})=>post)]);
- if(content===renderedContent){posts.forEach(updateReaction);return}
- renderedContent=content;
- const feed=$('feed'),top=feed.scrollTop;feed.innerHTML='';
- if(!posts.length){feed.innerHTML='<div class="empty">まだ投稿がありません。</div>';return}
- for(const post of posts){
-  const article=document.createElement('article');article.className='post';article.dataset.id=post.id;
-  const header=document.createElement('div');header.className='post-header';const author=document.createElement('span');author.textContent=`（${post.author}）`;header.append(author);
-  article.append(header);
-  if(typeof post.image==='string'&&/^data:image\/(jpeg|png|webp);base64,/.test(post.image)){const image=document.createElement('img');image.className='post-image';image.draggable=false;image.src=post.image;image.alt=post.name;image.loading='lazy';image.tabIndex=0;image.setAttribute('role','button');image.setAttribute('aria-label',post.name+'の写真を拡大');image.onclick=()=>enlargePhoto(image);image.onkeydown=event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();enlargePhoto(image)}};article.append(image)}
-  const intro=document.createElement('div');intro.className='sentence';intro.innerHTML=`<span>これは</span><span class="subject">${esc(post.name)}</span><span>です。</span>`;const text=document.createElement('div');text.className='post-text';text.append(intro);
-  const description=document.createElement('div');description.className='sentence';description.innerHTML=descriptionHtml(post.name,post.adjs||[],post.thing);text.append(description);article.append(text);
-  const reactions=document.createElement('div');reactions.className='reaction-row';
-  const count=document.createElement('span');count.className='reaction-count';count.setAttribute('aria-live','polite');
-  const like=document.createElement('button');like.type='button';like.className='like-button';like.textContent='♥ いいですね！';like.onclick=()=>reactToPost(post.id);
-  reactions.append(count,like);article.append(reactions);enableLongPress(article,post.id);feed.append(article);updateReaction(post);
- }
- feed.scrollTop=top;
-}
-async function syncPending(){
- if(!remote||syncing||!navigator.onLine)return;
- syncing=true;
- try{
-  for(const record of (await allRecords()).filter(p=>p.pending)){
-   const {pending,pendingLikes,...data}=record;
-   await remote.set(remote.ref(remote.db,DB_PATH+'/'+record.id),data);
-   await mutateRecord(record.id,current=>current.deleted===record.deleted?{...current,pending:false}:current);
-  }
-  for(const record of await allRecords()){
-   for(const key of record.pendingLikes||[]){
-    await remote.set(remote.ref(remote.db,DB_PATH+'/'+record.id+'/likes/'+key),true);
-    await mutateRecord(record.id,current=>({...current,pendingLikes:(current.pendingLikes||[]).filter(k=>k!==key)}));
-   }
-  }
-  $('syncStatus').textContent='已同步';
- }catch{$('syncStatus').textContent='已保存在此设备，联网后自动同步。'}finally{syncing=false}
-}
-async function initSync(){
- try{
-  const A=await import('https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js');
-  const D=await import('https://www.gstatic.com/firebasejs/12.4.0/firebase-database.js');
-  const config={apiKey:'AIzaSyCaLCM4TXURROKyDKD_Mga8ZnWr1-Wk9Wg',authDomain:'database-s-9e4b3.firebaseapp.com',databaseURL:'https://database-s-9e4b3-default-rtdb.asia-southeast1.firebasedatabase.app',projectId:'database-s-9e4b3',storageBucket:'database-s-9e4b3.firebasestorage.app',messagingSenderId:'13648984683',appId:'1:13648984683:web:c782d2963c253df69b8f2e'};
-  remote={...D,db:D.getDatabase(A.initializeApp(config))};
-  D.onValue(D.ref(remote.db,DB_PATH),async snapshot=>{
-   try{const local=await allRecords(),pending=new Set(local.filter(p=>p.pending).map(p=>p.id));const incoming=Object.values(snapshot.val()||{}).filter(p=>p&&typeof p.id==='string'&&!pending.has(p.id)).map(p=>{const current=local.find(item=>item.id===p.id),pendingLikes=current?.pendingLikes||[];return {...p,pending:false,pendingLikes,likes:{...p.likes,...Object.fromEntries(pendingLikes.map(key=>[key,true]))}}});await saveRecords(incoming);await refresh()}catch{$('syncStatus').textContent='同步失败，已保留本地投稿。'}
-  },()=>{$('syncStatus').textContent='已保存在此设备，暂时无法同步。'});
-  await syncPending();
- }catch{$('syncStatus').textContent='已保存在此设备，联网后自动同步。'}
-}
-async function compressImage(file){
- if(!file.type.startsWith('image/'))throw Error('请选择图片文件。');
- if(file.size>20*1024*1024)throw Error('请选择20MB以内的图片。');
- const url=URL.createObjectURL(file);
- try{
-  const image=new Image();image.src=url;try{await image.decode()}catch{throw Error('无法读取图片，请选择其他图片。')}
-  const scale=Math.min(1,960/Math.max(image.naturalWidth,image.naturalHeight));
-  const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(image.naturalWidth*scale));canvas.height=Math.max(1,Math.round(image.naturalHeight*scale));
-  const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.drawImage(image,0,0,canvas.width,canvas.height);
-  let data=canvas.toDataURL('image/jpeg',.8);if(data.length>650000)data=canvas.toDataURL('image/jpeg',.55);
-  if(data.length>1000000)throw Error('图片过大，请选择较小的图片。');return data;
- }finally{URL.revokeObjectURL(url)}
-}
-function showCrop(){
- if(!cropState)return;
- const {image,side,x,y}=cropState;
- const horizontal=image.naturalWidth-side,vertical=image.naturalHeight-side;
- $('imagePreview').style.objectPosition=(horizontal?x/horizontal*100:50)+'% '+(vertical?y/vertical*100:50)+'%';
-}
-function commitCrop(){
- if(!cropState)return;
- const {image,side,x,y}=cropState,canvas=document.createElement('canvas');
- canvas.width=canvas.height=Math.min(640,side);
- const context=canvas.getContext('2d');context.fillStyle='#fff';context.fillRect(0,0,canvas.width,canvas.height);
- context.drawImage(image,x,y,side,side,0,0,canvas.width,canvas.height);
- imageData=canvas.toDataURL('image/jpeg',.8);
-}
-function clearImage(){
- imageVersion++;imageBusy=false;imageData='';cropState=null;cropDrag=null;
- $('cropPreview').classList.remove('dragging');$('cropPreview').hidden=true;$('cropHint').hidden=true;
- $('imageInput').value='';$('imagePreview').hidden=true;$('imagePreview').removeAttribute('src');$('removePhoto').disabled=true;$('imageStatus').textContent='请选择图片';update();
-}
-$('cropPreview').addEventListener('pointerdown',event=>{
- if(!cropState||imageBusy||cropDrag||event.button!==0)return;
- event.preventDefault();
- cropDrag={pointer:event.pointerId,clientX:event.clientX,clientY:event.clientY,x:cropState.x,y:cropState.y,ratio:cropState.side/$('cropPreview').getBoundingClientRect().width};
- imageBusy=true;update();$('cropPreview').setPointerCapture(event.pointerId);$('cropPreview').classList.add('dragging');
-});
-$('cropPreview').addEventListener('pointermove',event=>{
- if(!cropState||!cropDrag||event.pointerId!==cropDrag.pointer)return;
- event.preventDefault();
- cropState.x=Math.max(0,Math.min(cropState.image.naturalWidth-cropState.side,cropDrag.x-(event.clientX-cropDrag.clientX)*cropDrag.ratio));
- cropState.y=Math.max(0,Math.min(cropState.image.naturalHeight-cropState.side,cropDrag.y-(event.clientY-cropDrag.clientY)*cropDrag.ratio));
- showCrop();
-});
-function finishCrop(event){
- if(!cropDrag||event.pointerId!==cropDrag.pointer)return;
- cropDrag=null;commitCrop();imageBusy=false;update();$('cropPreview').classList.remove('dragging');
- if($('cropPreview').hasPointerCapture(event.pointerId))$('cropPreview').releasePointerCapture(event.pointerId);
-}
-for(const event of ['pointerup','pointercancel','lostpointercapture'])$('cropPreview').addEventListener(event,finishCrop);
-$('cropPreview').addEventListener('keydown',event=>{
- if(!cropState||imageBusy)return;
- const direction={ArrowLeft:[1,0],ArrowRight:[-1,0],ArrowUp:[0,1],ArrowDown:[0,-1]}[event.key];if(!direction)return;
- event.preventDefault();const step=cropState.side*.05;
- cropState.x=Math.max(0,Math.min(cropState.image.naturalWidth-cropState.side,cropState.x+direction[0]*step));
- cropState.y=Math.max(0,Math.min(cropState.image.naturalHeight-cropState.side,cropState.y+direction[1]*step));
- showCrop();commitCrop();update();
-});
-$('imageInput').onchange=async()=>{
- const file=$('imageInput').files[0];if(!file)return;
- const version=++imageVersion;imageBusy=true;update();$('imageStatus').textContent='正在处理图片…';
- try{
-  const data=await compressImage(file),image=new Image();image.src=data;await image.decode();if(version!==imageVersion)return;
-  const side=Math.min(image.naturalWidth,image.naturalHeight);cropState={image,side,x:(image.naturalWidth-side)/2,y:(image.naturalHeight-side)/2};
-  $('imagePreview').src=data;$('imagePreview').hidden=false;$('cropPreview').hidden=false;$('cropHint').hidden=false;
-  showCrop();commitCrop();clearTimeout(toastTimer);$('toast').hidden=true;$('removePhoto').disabled=false;$('imageStatus').textContent='图片已选择';
- }
- catch(error){if(version!==imageVersion)return;notify(error.message||'无法读取图片，请重试。');$('imageStatus').textContent=imageData?'图片已选择':'请选择图片'}
- finally{if(version===imageVersion){imageBusy=false;update()}}
-};
-$('addPhoto').onclick=()=>$('imageInput').click();
-$('removePhoto').onclick=clearImage;
-$('objectName').oninput=update;
-$('nameInput').value=userName;
-$('nameForm').onsubmit=event=>{event.preventDefault();const name=$('nameInput').value.trim();if(!name)return;userName=name;localStorage.setItem('weekend_user_name_v1',name);$('nameModal').hidden=true;renderPosts();update()};
-$('postBtn').onclick=async()=>{
- if($('postBtn').disabled)return;
- posting=true;update();
- const record={id:crypto.randomUUID(),author:userName,name:$('objectName').value.trim(),adjs:[...selectedAdjs],thing:selectedThing,image:imageData,createdAt:Date.now(),pending:true,deleted:false};
- try{await saveRecords([record]);await refresh();$('objectName').value='';selectedAdjs=[];selectedThing='';clearImage();renderChoices();setFeedExpanded(true);$('feed').scrollTop=0;$('syncStatus').textContent='已保存在此设备。';void syncPending()}
- catch{notify('保存失败，请重试。')}
- finally{posting=false;update()}
-};
-window.addEventListener('online',syncPending);setInterval(syncPending,10000);
-renderChoices();update();
-(async()=>{try{store=await openStore();await prepareSyncNamespace();await refresh();if(posts.length)setFeedExpanded(true);update();void initSync()}catch{$('syncStatus').textContent='无法保存投稿，请允许浏览器使用本地存储。'}})();
-</script>
+  <main>
+    <header><h1>ito</h1><span id="remaining">接続中…</span></header>
+    <p class="label">あなたの数字</p>
+    <div class="card"><output id="number" aria-label="あなたの数字" aria-live="polite">—</output><span class="range">1 — 100</span></div>
+    <p id="status" role="status">接続しています…</p>
+    <button id="start" type="button" disabled>開始</button>
+    <footer>同じ数字が、同時に配られることはありません。<br>引き直すと、前の数字はデッキに戻ります。<br>接続が切れた場合も、サーバーが切断を検知すると返却されます。</footer>
+  </main>
+  <script type="module" src="./ito/app.js"></script>
 </body>
 </html>

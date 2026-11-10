@@ -28,6 +28,9 @@
     },
     "buidings": {
       ".write": true
+    },
+    "ito": {
+      ".write": true
     }
   }
 }
